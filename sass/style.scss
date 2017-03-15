@@ -1,0 +1,255 @@
+div.all-container{
+    display: block;
+    padding-top: 20px;
+    margin: auto;
+    width: 900px;
+    height: auto;
+}
+
+div.all-container ul li h3{
+    padding: 5px;
+    background: #eee;
+}
+
+div.fretboard{
+	display: block;
+	margin: auto;
+        /*margin-top: 10px;*/
+	width: 720px;
+	height: 180px;
+	background: #eee;
+}
+
+div.keyboard{
+    display: block;
+    margin: auto;
+    /*margin-top: 10px;*/
+    width: 720px;
+    height: 120px;
+    background: #eee;
+}
+
+div.theory{
+    display: block;
+    margin: auto;
+    /*margin-top: 25px;
+    margin-bottom: 25px;*/
+    width: 900px;
+    height: 400px;
+}
+
+div.chord-builder{
+    display: block;
+    margin: auto;
+    /*margin-top: 25px;
+    margin-bottom: 25px;*/
+    width: 720px;
+    height: 200px;
+}
+
+#scale-pentatonic{
+    cursor: pointer;
+}
+
+.scale-marker,
+.pentatonic-marker{
+    opacity: 0;
+}
+
+.scale-marker.selected,
+.pentatonic-marker.selected{
+    g path{
+        fill: #000;
+    }
+    opacity: 1;
+}
+
+@for $i from 1 through 8 {
+#clef-s#{$i},
+#clef-f#{$i},
+#clefb-s#{$i},
+#clefb-f#{$i}{
+    opacity: 0;
+}
+}
+
+@for $i from 1 through 8 {
+#noterel-#{$i} text{
+  font-size: 3px !important;
+  font-family: "Fira Sans", sans;
+}
+}
+
+
+/* TODO: Not a beautiful solution at all... */
+@for $i from 1 through 8 {
+#clef-s#{$i}.visible-accidental,
+#clef-f#{$i}.visible-accidental,
+#clefb-s#{$i}.visible-accidental,
+#clefb-f#{$i}.visible-accidental{
+    opacity: 1;
+}
+}
+
+.circle-scale{
+    cursor: pointer;
+}
+
+.keyboard-white-key-default{
+    fill: #fff;
+    stroke: #000;
+}
+
+.keyboard-black-key-default{
+    fill: #000;
+    stroke: #000;
+}
+
+div.fretboard-bass{
+	display: block;
+	margin: auto;
+        /*margin-top: 10px;*/
+	width: 720px;
+	height: 140px;
+	background: #eee;
+}
+
+.fretboard-default{
+	fill: #3e2119;
+	stroke: #eee;
+	storke-width: 2px;
+}
+
+.fretboard-default .fretboard-shadow-default{
+    stroke: #2D130C;
+}
+
+.fretboard-bass{
+    	fill: #111;
+	stroke: #eee;
+	storke-width: 2px;
+}
+
+.fretboard-bass .fretboard-shadow-default{
+    stroke: #000;
+}
+
+.keyboard-marker-default {
+    fill: #eee;
+    stroke: #555;
+    stroke-width: 1px;
+    cursor: pointer;
+}
+
+.fretboard-marker-default {
+  fill: #eee;
+  stroke: #555;
+  cursor: pointer;
+  }
+
+ .keyboard-marker-inactive{
+      opacity: 0;
+  }
+  
+  
+ .keyboard-marker-selected, .keyboard-marker-highlighted{
+     opacity: 1;
+  }
+  
+  .keyboard-marker-selected{
+     stroke: #d12c00;
+     stroke-width: 2px;
+  }
+  
+.keyboard-marker-highlighted.keyboard-marker-highlighted-root{
+    fill: #ffa8c8;
+}
+  
+.fretboard-marker-inactive{
+	opacity: 0;
+}
+
+.fretboard-marker-selected, .fretboard-marker-highlighted{
+	opacity: 1;
+}
+
+.chordbuild-marker, .chordbuild-add, .chordbuild-chord{
+    cursor: pointer;
+}
+
+.chordbuild-marker circle, .chordbuild-chord rect{
+    fill: #fff;
+    stroke: #999;
+    stroke-width: 3px;
+}
+
+.chordbuild-marker-selected circle, .chordbuild-marker-selected rect{
+    fill: #fff;
+    stroke: #d20050;
+    stroke-width: 3px;
+}
+
+.chordbuild-add circle{
+    fill: #fff;
+    stroke: #000;
+    stroke-width: 3px;
+}
+
+.chordbuild-add text{
+    font-size: 2em;
+}
+
+.fretboard-marker-default text{
+  fill: #555;
+  stroke: none;
+  font-size: 10px;
+  font-family: "Fira Sans", sans;
+}
+
+.fretboard-marker-highlighted{
+    fill: #f4ffa8;
+}
+
+.fretboard-marker-selected rect{
+     stroke: #d12c00;
+     stroke-width: 2px;
+}
+
+.fretboard-marker-highlighted.fretboard-marker-highlighted-root{
+    fill: #ffa8c8;
+}
+
+.fretboard-marker-highlighted.fretboard-marker-highlighted-root text{
+    fill: #000;
+}
+
+.fretboard-marker-highlighted text{
+    fill: #000;
+    stroke: none;
+    font-size: 10px;
+}
+
+.fretboard-nut-default{
+	fill: #7C5B53;
+	stroke: #eee;
+	storke-width: 2px;
+}
+
+.fretboard-nut-bass{
+    fill: #ddd;
+    stroke: #eee;
+    storke-width: 2px;
+}
+
+.fret-dot-default{
+	fill: #fff;
+}
+
+.fret-string{
+    /*stroke: #e4ddcb;*/
+    stroke: #ffe;
+}
+
+.fret-wound-string{
+    stroke-dasharray: 1,1;
+}

@@ -1,0 +1,317 @@
+div.all-container {
+  display: block;
+  padding-top: 20px;
+  margin: auto;
+  width: 900px;
+  height: auto; }
+
+div.all-container ul li h3 {
+  padding: 5px;
+  background: #eee; }
+
+div.fretboard {
+  display: block;
+  margin: auto;
+  /*margin-top: 10px;*/
+  width: 720px;
+  height: 180px;
+  background: #eee; }
+
+div.keyboard {
+  display: block;
+  margin: auto;
+  /*margin-top: 10px;*/
+  width: 720px;
+  height: 120px;
+  background: #eee; }
+
+div.theory {
+  display: block;
+  margin: auto;
+  /*margin-top: 25px;
+  margin-bottom: 25px;*/
+  width: 900px;
+  height: 400px; }
+
+div.chord-builder {
+  display: block;
+  margin: auto;
+  /*margin-top: 25px;
+  margin-bottom: 25px;*/
+  width: 720px;
+  height: 200px; }
+
+#scale-pentatonic {
+  cursor: pointer; }
+
+.scale-marker,
+.pentatonic-marker {
+  opacity: 0; }
+
+.scale-marker.selected,
+.pentatonic-marker.selected {
+  opacity: 1; }
+  .scale-marker.selected g path,
+  .pentatonic-marker.selected g path {
+    fill: #000; }
+
+#clef-s1,
+#clef-f1,
+#clefb-s1,
+#clefb-f1 {
+  opacity: 0; }
+
+#clef-s2,
+#clef-f2,
+#clefb-s2,
+#clefb-f2 {
+  opacity: 0; }
+
+#clef-s3,
+#clef-f3,
+#clefb-s3,
+#clefb-f3 {
+  opacity: 0; }
+
+#clef-s4,
+#clef-f4,
+#clefb-s4,
+#clefb-f4 {
+  opacity: 0; }
+
+#clef-s5,
+#clef-f5,
+#clefb-s5,
+#clefb-f5 {
+  opacity: 0; }
+
+#clef-s6,
+#clef-f6,
+#clefb-s6,
+#clefb-f6 {
+  opacity: 0; }
+
+#clef-s7,
+#clef-f7,
+#clefb-s7,
+#clefb-f7 {
+  opacity: 0; }
+
+#clef-s8,
+#clef-f8,
+#clefb-s8,
+#clefb-f8 {
+  opacity: 0; }
+
+#noterel-1 text {
+  font-size: 3px !important;
+  font-family: "Fira Sans", sans; }
+
+#noterel-2 text {
+  font-size: 3px !important;
+  font-family: "Fira Sans", sans; }
+
+#noterel-3 text {
+  font-size: 3px !important;
+  font-family: "Fira Sans", sans; }
+
+#noterel-4 text {
+  font-size: 3px !important;
+  font-family: "Fira Sans", sans; }
+
+#noterel-5 text {
+  font-size: 3px !important;
+  font-family: "Fira Sans", sans; }
+
+#noterel-6 text {
+  font-size: 3px !important;
+  font-family: "Fira Sans", sans; }
+
+#noterel-7 text {
+  font-size: 3px !important;
+  font-family: "Fira Sans", sans; }
+
+#noterel-8 text {
+  font-size: 3px !important;
+  font-family: "Fira Sans", sans; }
+
+/* TODO: Not a beautiful solution at all... */
+#clef-s1.visible-accidental,
+#clef-f1.visible-accidental,
+#clefb-s1.visible-accidental,
+#clefb-f1.visible-accidental {
+  opacity: 1; }
+
+#clef-s2.visible-accidental,
+#clef-f2.visible-accidental,
+#clefb-s2.visible-accidental,
+#clefb-f2.visible-accidental {
+  opacity: 1; }
+
+#clef-s3.visible-accidental,
+#clef-f3.visible-accidental,
+#clefb-s3.visible-accidental,
+#clefb-f3.visible-accidental {
+  opacity: 1; }
+
+#clef-s4.visible-accidental,
+#clef-f4.visible-accidental,
+#clefb-s4.visible-accidental,
+#clefb-f4.visible-accidental {
+  opacity: 1; }
+
+#clef-s5.visible-accidental,
+#clef-f5.visible-accidental,
+#clefb-s5.visible-accidental,
+#clefb-f5.visible-accidental {
+  opacity: 1; }
+
+#clef-s6.visible-accidental,
+#clef-f6.visible-accidental,
+#clefb-s6.visible-accidental,
+#clefb-f6.visible-accidental {
+  opacity: 1; }
+
+#clef-s7.visible-accidental,
+#clef-f7.visible-accidental,
+#clefb-s7.visible-accidental,
+#clefb-f7.visible-accidental {
+  opacity: 1; }
+
+#clef-s8.visible-accidental,
+#clef-f8.visible-accidental,
+#clefb-s8.visible-accidental,
+#clefb-f8.visible-accidental {
+  opacity: 1; }
+
+.circle-scale {
+  cursor: pointer; }
+
+.keyboard-white-key-default {
+  fill: #fff;
+  stroke: #000; }
+
+.keyboard-black-key-default {
+  fill: #000;
+  stroke: #000; }
+
+div.fretboard-bass {
+  display: block;
+  margin: auto;
+  /*margin-top: 10px;*/
+  width: 720px;
+  height: 140px;
+  background: #eee; }
+
+.fretboard-default {
+  fill: #3e2119;
+  stroke: #eee;
+  storke-width: 2px; }
+
+.fretboard-default .fretboard-shadow-default {
+  stroke: #2D130C; }
+
+.fretboard-bass {
+  fill: #111;
+  stroke: #eee;
+  storke-width: 2px; }
+
+.fretboard-bass .fretboard-shadow-default {
+  stroke: #000; }
+
+.keyboard-marker-default {
+  fill: #eee;
+  stroke: #555;
+  stroke-width: 1px;
+  cursor: pointer; }
+
+.fretboard-marker-default {
+  fill: #eee;
+  stroke: #555;
+  cursor: pointer; }
+
+.keyboard-marker-inactive {
+  opacity: 0; }
+
+.keyboard-marker-selected, .keyboard-marker-highlighted {
+  opacity: 1; }
+
+.keyboard-marker-selected {
+  stroke: #d12c00;
+  stroke-width: 2px; }
+
+.keyboard-marker-highlighted.keyboard-marker-highlighted-root {
+  fill: #ffa8c8; }
+
+.fretboard-marker-inactive {
+  opacity: 0; }
+
+.fretboard-marker-selected, .fretboard-marker-highlighted {
+  opacity: 1; }
+
+.chordbuild-marker, .chordbuild-add, .chordbuild-chord {
+  cursor: pointer; }
+
+.chordbuild-marker circle, .chordbuild-chord rect {
+  fill: #fff;
+  stroke: #999;
+  stroke-width: 3px; }
+
+.chordbuild-marker-selected circle, .chordbuild-marker-selected rect {
+  fill: #fff;
+  stroke: #d20050;
+  stroke-width: 3px; }
+
+.chordbuild-add circle {
+  fill: #fff;
+  stroke: #000;
+  stroke-width: 3px; }
+
+.chordbuild-add text {
+  font-size: 2em; }
+
+.fretboard-marker-default text {
+  fill: #555;
+  stroke: none;
+  font-size: 10px;
+  font-family: "Fira Sans", sans; }
+
+.fretboard-marker-highlighted {
+  fill: #f4ffa8; }
+
+.fretboard-marker-selected rect {
+  stroke: #d12c00;
+  stroke-width: 2px; }
+
+.fretboard-marker-highlighted.fretboard-marker-highlighted-root {
+  fill: #ffa8c8; }
+
+.fretboard-marker-highlighted.fretboard-marker-highlighted-root text {
+  fill: #000; }
+
+.fretboard-marker-highlighted text {
+  fill: #000;
+  stroke: none;
+  font-size: 10px; }
+
+.fretboard-nut-default {
+  fill: #7C5B53;
+  stroke: #eee;
+  storke-width: 2px; }
+
+.fretboard-nut-bass {
+  fill: #ddd;
+  stroke: #eee;
+  storke-width: 2px; }
+
+.fret-dot-default {
+  fill: #fff; }
+
+.fret-string {
+  /*stroke: #e4ddcb;*/
+  stroke: #ffe; }
+
+.fret-wound-string {
+  stroke-dasharray: 1,1; }
+
+/*# sourceMappingURL=style.css.map */

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- Let Fira Sans do all its magic -->
+        <link href="https://fonts.googleapis.com/css?family=Fira+Sans&amp;subset=cyrillic" rel="stylesheet"> 
+
+        <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+        <title>Composer's friend</title>
+
+        <!-- Bootstrap -->
+        <!-- <link href="css/bootstrap.min.css" rel="stylesheet"> -->
+
+        <!-- The document -->
+        <link href="css/style.css" rel="stylesheet">
+
+        <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+          <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <!-- D3.js / TODO: change to production -->
+        <script src="js/d3.js"></script>
+
+    </head>
+    <body>
+
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="js/jquery-3.1.1.min.js"></script>
+
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <!-- <script src="js/bootstrap.min.js"></script> -->
+        <link rel="stylesheet" href="css/uikit.css" />
+        <script src="js/uikit.js"></script>
+
+        <!-- Create div containers -->
+        <div class="all-container">
+            <h2 style="font-family: 'Fira Sans'">Composer's friend</h2>
+            <ul uk-accordion="multiple: true">
+                <li class="uk-open">
+                    <h3 class="uk-accordion-title">Circle of fifths</h3>
+                    <div class="uk-accordion-content">
+                        <div class="theory" id="theory-container"></div>
+                    </div>
+                </li>
+                <li class="uk-open">
+                    <h3 class="uk-accordion-title">Chord builder</h3>
+                    <div class="uk-accordion-content">
+                        <div class="chord-builder"></div>
+                    </div>
+                </li>
+                <li class="uk-open">
+                    <h3 class="uk-accordion-title">Keyboard</h3>
+                    <div class="uk-accordion-content">
+                        <div class="keyboard"></div>
+                    </div>
+                </li>
+                <li class="uk-open">
+                    <h3 class="uk-accordion-title">Guitar</h3>
+                    <div class="uk-accordion-content">
+                        <div class="fretboard fb-guitar"></div>
+                    </div>
+                </li>
+                <li>
+                    <h3 class="uk-accordion-title">Bass</h3>
+                    <div class="uk-accordion-content">
+                        <div class="fretboard-bass fb-bass"></div>
+                    </div>
+                </li>
+            </ul>
+
+        </div>
+
+        <!-- THE test script -->
+        <script src="js/composer-tools.js"></script>
+
+        <!-- Create a couple of fretboards ... -->
+        <script type="text/javascript">
+            my_theory = new comptoolsTheory("theory-container");
+            
+            my_chbuild = new comptoolsChordbuilder(".chord-builder");
+
+            st_keyboard = new comptoolsKeyboard(".keyboard", "C1-C5");
+
+            fb_guitar = new comptoolsFretboard(".fb-guitar", "E4B3G3D3A2E2");
+
+            // Options for the bass
+            bass_options = {"firstFretWidth": 70,
+                "fretboardClass": "fretboard-bass",
+                "fretboardNutClass": "fretboard-nut-bass",
+                "fretCount": 17};
+            fb_bass = new comptoolsFretboard(".fb-bass", "G2D2A1E1", bass_options);
+
+            // Connect all the instruments together
+            the_glue = new InstrumentGlue();
+            the_glue.objArray.push(st_keyboard);
+            the_glue.objArray.push(fb_guitar);
+            the_glue.objArray.push(fb_bass);
+            
+            st_keyboard.selection_callback = the_glue.funCallback;
+            fb_guitar.selection_callback = the_glue.funCallback;
+            fb_bass.selection_callback = the_glue.funCallback;
+
+            the_glue.theory = my_theory;
+            my_theory.selection_callback = the_glue.funHighlightNotes;
+            
+            the_glue.chord_builder = my_chbuild;
+            my_chbuild.selection_callback = the_glue.funHighlightChordNotes;
+
+        </script>
+
+    </body>
+</html>
