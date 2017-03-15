@@ -42,7 +42,7 @@ var chord_structures = {
     "dom7aug5": [4, 8, 10],
     "dom7sus4": [5, 7, 10],
     "aug": [4, 8],
-    "minor": [3, 7],
+    "min": [3, 7],
     "min6": [3, 7, 9],
     "min7": [3, 7, 10],
     "min7b5": [3, 6, 10],
