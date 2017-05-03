@@ -319,4 +319,23 @@ div.fretboard-bass {
 .fret-wound-string {
   stroke-dasharray: 1,1; }
 
+/* Chord list */
+.chord-list-element span.chord-text,
+.chord-list-element.uk-sortable-item span.chord-text,
+.chord-list-element.uk-sortable-placeholder span.chord-text {
+  font-size: 0.8em; }
+.chord-list-element span.btn-delete,
+.chord-list-element.uk-sortable-item span.btn-delete,
+.chord-list-element.uk-sortable-placeholder span.btn-delete {
+  color: red; }
+.chord-list-element .uk-card-body,
+.chord-list-element.uk-sortable-item .uk-card-body,
+.chord-list-element.uk-sortable-placeholder .uk-card-body {
+  padding: 5px 5px; }
+@media (min-width: 1200px) {
+  .chord-list-element .uk-card-body,
+  .chord-list-element.uk-sortable-item .uk-card-body,
+  .chord-list-element.uk-sortable-placeholder .uk-card-body {
+    padding: 10px 10px; } }
+
 /*# sourceMappingURL=style.css.map */

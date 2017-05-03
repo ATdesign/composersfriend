@@ -259,3 +259,26 @@ div.fretboard-bass{
 .fret-wound-string{
     stroke-dasharray: 1,1;
 }
+
+/* Chord list */
+.chord-list-element,
+.chord-list-element.uk-sortable-item,
+.chord-list-element.uk-sortable-placeholder{
+    span.chord-text{
+        font-size: 0.8em;
+    }
+    
+    span.btn-delete{
+        color: red;
+    }
+
+    .uk-card-body {
+        padding: 5px 5px;
+    }
+    
+    @media (min-width: 1200px) {
+        .uk-card-body {
+            padding: 10px 10px;
+        }
+    }
+}

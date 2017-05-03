@@ -66,6 +66,39 @@ function get_chord(note, chord)
     return my_notes;
 }
 
+// Function to return chord notes
+function get_chord_notes(note, chord, oct)
+{
+    // Start from 4th "octave" by default
+    if (oct === undefined)
+    {
+        oct = 4;
+    }
+    
+    // Generate an octave worth of notes to work with
+    var my_n = note_array.indexOf(note.toUpperCase());
+    var fi_n = my_n;
+    var now_notes = new Array();
+    
+    for (j = 0; j < 12; j++)
+        {
+            now_note = note_array[(fi_n + j) % note_array.length];
+            now_notes.push(now_note + oct);
+            console.log(now_note + oct);
+            // Test one step ahead
+            oct += ((fi_n + j + 1) % note_array.length === 0 ? 1 : 0);
+        }
+
+    var my_c = chord_structures[chord.toLowerCase()];
+
+    var my_notes = new Array();
+    my_notes.push(now_notes[0]);
+    for (k = 0; k < my_c.length; k++) {
+        my_notes.push(now_notes[my_c[k]]);
+    }
+    return my_notes;
+}
+
 // Used for converting between sharps / flats
 var pure_tones = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
@@ -910,8 +943,8 @@ function comptoolsFretboard(cont_class, tuning, options) {
         {
             now_note = note_array[(first_note + j) % note_array.length];
             now_note_class = "note-" + now_note.replace("#", "s").toLowerCase();
-            first_note_index += ((first_note + j) % note_array.length === 0 ? 1 : 0);
             now_note_num_class = now_note_class + first_note_index;
+            first_note_index += ((first_note + j + 1) % note_array.length === 0 ? 1 : 0);
 
             var current_note_class = FRET_DEFAULT_MARKER_CLASS + " "
                     + "fretboard-marker-inactive" + " "
