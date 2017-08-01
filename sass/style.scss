@@ -197,7 +197,7 @@ div.fretboard-bass{
 
 .chordbuild-add circle{
     fill: #fff;
-    stroke: #000;
+    stroke: #999;
     stroke-width: 3px;
 }
 
@@ -280,5 +280,22 @@ div.fretboard-bass{
         .uk-card-body {
             padding: 10px 10px;
         }
+    }
+}
+
+.chord-header{
+    text-align: left;
+    margin-bottom: 1em;
+}
+
+.chord-option{
+    width: 100%;
+    font-size: 0.8em;
+    .chord-option-label{
+        width: 45px;
+        display: block;
+    }
+    .chord-text-input{
+        width: 40px;
     }
 }

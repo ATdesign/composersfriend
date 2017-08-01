@@ -52,6 +52,15 @@ var chord_structures = {
     "sus2": [2, 7]
 };
 
+// Chord list item specific
+var CHORD_LIST_ITEM_TEMPLATE = "<div class=\"uk-card uk-card-default uk-card-body\"><div class=\"chord-header\"><span class=\"uk-sortable-handle\" uk-icon=\"icon: table\"></span> <span class=\"chord-text\">{{chord-text}}</span><br /></div><div class=\"chord-option chord-length\"><span class=\"chord-option-label\">Length:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle; ratio:0.8;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"1/2\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle; ratio:0.8;\"></span></div><div class=\"chord-option chord-octave\"><span class=\"chord-option-label\">Octave:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle; ratio:0.8;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"3\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle; ratio:0.8;\"></span></div></div>";
+var CHORD_LENGTHS = ["1/16", "1/12", "1/8", "1/6", "1/4", "1/3", "1/2", "1"];
+var CHORD_LIST_ID = "chord-list";
+var CHORD_LIST_ITEM_CLASS = "chord-list-element";
+
+// Global counter
+var chord_list_counter = 0;
+
 // Function to return chord notes
 function get_chord(note, chord)
 {
@@ -72,7 +81,7 @@ function get_chord_notes(note, chord, oct)
     // Start from 4th "octave" by default
     if (oct === undefined)
     {
-        oct = 4;
+        oct = 3;
     }
     
     // Generate an octave worth of notes to work with
@@ -84,7 +93,6 @@ function get_chord_notes(note, chord, oct)
         {
             now_note = note_array[(fi_n + j) % note_array.length];
             now_notes.push(now_note + oct);
-            console.log(now_note + oct);
             // Test one step ahead
             oct += ((fi_n + j + 1) % note_array.length === 0 ? 1 : 0);
         }
@@ -1136,9 +1144,6 @@ function comptoolsChordbuilder(cont_class) {
     }
 
     // Create the add button
-    // TODO: For now, disable it; the idea is to make the button 
-    // active only when we have both a note and a chord selected
-    /*
      now_g = this.svg_chordbuild.append("g")
      .attr("class", CHBUILD_DEFAULT_ADD_CLASS);
      
@@ -1151,7 +1156,7 @@ function comptoolsChordbuilder(cont_class) {
      .attr("x", half_h)
      .attr("y", half_h+8)
      .text("+");
-     */
+     
 
     var fh = Math.floor(4 / 5 * chordbuild_h + 2 * circ_r);
     var base_y = Math.floor(half_h - fh / 2);
@@ -1246,3 +1251,37 @@ comptoolsChordbuilder.prototype.update_chord = function () {
 comptoolsChordbuilder.prototype.selection_callback = function () {
     return 0;
 };
+
+// **********************
+// Chord player functions
+// **********************
+
+// The object
+function comptoolsChordPlayerElement(root, chord)
+{
+    // Initialization 
+    
+    var self = this;
+    
+    var my_chord = CHORD_LIST_ITEM_TEMPLATE.replace('{{chord-text}}', root + " " + chord);
+    
+    console.log(my_chord);
+    
+    this.my_root = root;
+    this.my_chord = chord;
+    
+    // Add to DOM
+    var chord_list_elem = d3.select("#" + CHORD_LIST_ID);
+    chord_list_elem.append('li')
+                   .attr('class', CHORD_LIST_ITEM_CLASS)
+                   .attr('id', 'chord-list-item-'+chord_list_counter++)
+                   .html(my_chord);
+           
+    // Delete
+    this.delete = function()
+    {
+        
+    }
+           
+           
+}
