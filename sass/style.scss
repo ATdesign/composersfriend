@@ -291,11 +291,21 @@ div.fretboard-bass{
 .chord-option{
     width: 100%;
     font-size: 0.8em;
+    line-height: 250%;
     .chord-option-label{
         width: 50px;
         display: inline-block;
     }
     .chord-text-input{
         width: 40px;
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+    .chord-controls{
+        cursor: pointer;
+    }
+    
+    .chord-delete{
+        color: red;
     }
 }

@@ -53,8 +53,9 @@ var chord_structures = {
 };
 
 // Chord list item specific
-var CHORD_LIST_ITEM_TEMPLATE = "<div class=\"uk-card uk-card-default uk-card-body\"><div class=\"chord-header\"><span class=\"uk-sortable-handle\" uk-icon=\"icon: table\"></span> <span class=\"chord-text\">{{chord-text}}</span><br /></div><div class=\"chord-option chord-length\"><span class=\"chord-option-label\">Length:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"1/2\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span></div><div class=\"chord-option chord-octave\"><span class=\"chord-option-label\">Octave:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"3\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span><br /><br /><span class=\"chord-controls chord-duplicate\">duplicate</span> | <span class=\"chord-controls chord-delete\">delete</span></div></div>";
+var CHORD_LIST_ITEM_TEMPLATE = "<div class=\"uk-card uk-card-default uk-card-body\"><div class=\"chord-header\"><span class=\"uk-sortable-handle\" uk-icon=\"icon: table\"></span> <span class=\"chord-text\">{{chord-text}}</span><br /></div><div class=\"chord-option chord-length\"><span class=\"chord-option-label\">Length:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"1/2\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span></div><div class=\"chord-option chord-octave\"><span class=\"chord-option-label\">Octave:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"3\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span></div><div class=\"chord-option chord-actions\"><span class=\"chord-controls chord-duplicate\">duplicate</span> | <span class=\"chord-controls chord-delete\">delete</span></div></div>";
 var CHORD_LENGTHS = ["1/16", "1/12", "1/8", "1/6", "1/4", "1/3", "1/2", "1"];
+var CHORD_OCTAVES = [1,2,3,4,5];
 var CHORD_LIST_ID = "chord-list";
 var CHORD_LIST_ITEM_CLASS = "chord-list-element";
 
@@ -1260,13 +1261,16 @@ comptoolsChordbuilder.prototype.selection_callback = function () {
 function comptoolsChordPlayerElement(root, chord)
 {
     // Initialization 
-    
     var self = this;
     
     var my_chord = CHORD_LIST_ITEM_TEMPLATE.replace('{{chord-text}}', root + " " + chord);
     
     this.my_root = root;
     this.my_chord = chord;
+    
+    // Indices for duration and octave: defaults to length of 1/2 and 3rd octave
+    this.duration_index = CHORD_LENGTHS.indexOf('1/2');
+    this.octave_index = CHORD_OCTAVES.indexOf(3);
     
     this.elem_id = 'chord-list-item-'+chord_list_counter++;
     
@@ -1276,14 +1280,33 @@ function comptoolsChordPlayerElement(root, chord)
                       .attr('class', CHORD_LIST_ITEM_CLASS)
                       .attr('id', this.elem_id)
                       .html(my_chord);
-           
-    // Delete
+    
+    // Update duration
+    this.updateDuration = function(dir)
+    {
+        // Add to current index, check that it's within bounds
+        this.duration_index += dir;
+        
+        if (this.duration_index < 0){
+            this.duration_index = 0;
+        }
+        if (this.duration_index > CHORD_LENGTHS.length){
+            this.duration_index = CHORD_LENGTHS.length;
+        }
+        
+        // Set the appropriate value in the text box
+        var my_dur = CHORD_LENGTHS[this.duration_index];
+        d3.select('.chord-option .chord-text-input').attr('value', my_dur);
+        
+    }
+    
+    // Delete method
     this.delete = function()
     {
         this.list_elem.remove();
         delete(a);
         return true;
-    }
+    };
            
            
 }
