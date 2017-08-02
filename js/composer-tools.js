@@ -53,7 +53,7 @@ var chord_structures = {
 };
 
 // Chord list item specific
-var CHORD_LIST_ITEM_TEMPLATE = "<div class=\"uk-card uk-card-default uk-card-body\"><div class=\"chord-header\"><span class=\"uk-sortable-handle\" uk-icon=\"icon: table\"></span> <span class=\"chord-text\">{{chord-text}}</span><br /></div><div class=\"chord-option chord-length\"><span class=\"chord-option-label\">Length:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle; ratio:0.8;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"1/2\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle; ratio:0.8;\"></span></div><div class=\"chord-option chord-octave\"><span class=\"chord-option-label\">Octave:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle; ratio:0.8;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"3\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle; ratio:0.8;\"></span></div></div>";
+var CHORD_LIST_ITEM_TEMPLATE = "<div class=\"uk-card uk-card-default uk-card-body\"><div class=\"chord-header\"><span class=\"uk-sortable-handle\" uk-icon=\"icon: table\"></span> <span class=\"chord-text\">{{chord-text}}</span><br /></div><div class=\"chord-option chord-length\"><span class=\"chord-option-label\">Length:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"1/2\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span></div><div class=\"chord-option chord-octave\"><span class=\"chord-option-label\">Octave:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"3\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span><br /><br /><span class=\"chord-controls chord-duplicate\">duplicate</span> | <span class=\"chord-controls chord-delete\">delete</span></div></div>";
 var CHORD_LENGTHS = ["1/16", "1/12", "1/8", "1/6", "1/4", "1/3", "1/2", "1"];
 var CHORD_LIST_ID = "chord-list";
 var CHORD_LIST_ITEM_CLASS = "chord-list-element";
@@ -1252,9 +1252,9 @@ comptoolsChordbuilder.prototype.selection_callback = function () {
     return 0;
 };
 
-// **********************
-// Chord player functions
-// **********************
+// **********************************
+// Chord player objects and functions
+// **********************************
 
 // The object
 function comptoolsChordPlayerElement(root, chord)
@@ -1265,22 +1265,24 @@ function comptoolsChordPlayerElement(root, chord)
     
     var my_chord = CHORD_LIST_ITEM_TEMPLATE.replace('{{chord-text}}', root + " " + chord);
     
-    console.log(my_chord);
-    
     this.my_root = root;
     this.my_chord = chord;
     
+    this.elem_id = 'chord-list-item-'+chord_list_counter++;
+    
     // Add to DOM
     var chord_list_elem = d3.select("#" + CHORD_LIST_ID);
-    chord_list_elem.append('li')
-                   .attr('class', CHORD_LIST_ITEM_CLASS)
-                   .attr('id', 'chord-list-item-'+chord_list_counter++)
-                   .html(my_chord);
+    this.list_elem = chord_list_elem.append('li')
+                      .attr('class', CHORD_LIST_ITEM_CLASS)
+                      .attr('id', this.elem_id)
+                      .html(my_chord);
            
     // Delete
     this.delete = function()
     {
-        
+        this.list_elem.remove();
+        delete(a);
+        return true;
     }
            
            
