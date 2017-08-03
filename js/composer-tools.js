@@ -55,12 +55,56 @@ var chord_structures = {
 // Chord list item specific
 var CHORD_LIST_ITEM_TEMPLATE = "<div class=\"uk-card uk-card-default uk-card-body\"><div class=\"chord-header\"><span class=\"uk-sortable-handle\" uk-icon=\"icon: table\"></span> <span class=\"chord-text\">{{chord-text}}</span><br /></div><div class=\"chord-option chord-length\"><span class=\"chord-option-label\">Length:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"1/2\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span></div><div class=\"chord-option chord-octave\"><span class=\"chord-option-label\">Octave:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"3\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span></div><div class=\"chord-option chord-actions\"><span class=\"chord-controls chord-duplicate\">duplicate</span> | <span class=\"chord-controls chord-delete\">delete</span></div></div>";
 var CHORD_LENGTHS = ["1/16", "1/12", "1/8", "1/6", "1/4", "1/3", "1/2", "1"];
-var CHORD_OCTAVES = [1,2,3,4,5];
+var CHORD_OCTAVES = [1, 2, 3, 4, 5];
 var CHORD_LIST_ID = "chord-list";
 var CHORD_LIST_ITEM_CLASS = "chord-list-element";
 
-// Global counter
+// Global counter and chord placeholder
 var chord_list_counter = 0;
+var chord_list = [];
+
+// Helper functions
+
+// Saturates value so that it cannot go outside feasible bounds
+function saturate_value(val, minval, maxval)
+{
+    if (minval === undefined) {
+        minval = -1;
+        console.log('Minimum saturation value is undefined! Check your code.');
+    }
+
+    if (maxval === undefined) {
+        maxval = 1;
+        console.log('Maximum saturation value is undefined! Check your code.');
+    }
+
+    if (val < minval) {
+        val = minval;
+    }
+    if (val > maxval) {
+        val = maxval;
+    }
+
+    return val;
+}
+
+
+// Remove object from array by property
+function array_del_object(arr, prop, val)
+{
+    // Find the index of the object
+    found = -1;
+    for (k=0; k<arr.length; k++)
+    {
+        if (arr[k][prop] === val){
+            break;
+            found = k;
+        }
+    }
+    
+    arr.splice(found, 1);
+}
+
 
 // Function to return chord notes
 function get_chord(note, chord)
@@ -84,19 +128,19 @@ function get_chord_notes(note, chord, oct)
     {
         oct = 3;
     }
-    
+
     // Generate an octave worth of notes to work with
     var my_n = note_array.indexOf(note.toUpperCase());
     var fi_n = my_n;
     var now_notes = new Array();
-    
+
     for (j = 0; j < 12; j++)
-        {
-            now_note = note_array[(fi_n + j) % note_array.length];
-            now_notes.push(now_note + oct);
-            // Test one step ahead
-            oct += ((fi_n + j + 1) % note_array.length === 0 ? 1 : 0);
-        }
+    {
+        now_note = note_array[(fi_n + j) % note_array.length];
+        now_notes.push(now_note + oct);
+        // Test one step ahead
+        oct += ((fi_n + j + 1) % note_array.length === 0 ? 1 : 0);
+    }
 
     var my_c = chord_structures[chord.toLowerCase()];
 
@@ -1145,19 +1189,20 @@ function comptoolsChordbuilder(cont_class) {
     }
 
     // Create the add button
-     now_g = this.svg_chordbuild.append("g")
-     .attr("class", CHBUILD_DEFAULT_ADD_CLASS);
-     
-     now_g.append("circle").attr("cx", half_h)
-     .attr("cy", half_h)
-     .attr("r", circ_r);
-     
-     now_g.append("text")
-     .attr("text-anchor", "middle")
-     .attr("x", half_h)
-     .attr("y", half_h+8)
-     .text("+");
-     
+    now_g = this.svg_chordbuild.append("g")
+            .attr("class", CHBUILD_DEFAULT_ADD_CLASS)
+            .on("click", this.add_chord_to_player());
+
+    now_g.append("circle").attr("cx", half_h)
+            .attr("cy", half_h)
+            .attr("r", circ_r);
+
+    now_g.append("text")
+            .attr("text-anchor", "middle")
+            .attr("x", half_h)
+            .attr("y", half_h + 8)
+            .text("+");
+
 
     var fh = Math.floor(4 / 5 * chordbuild_h + 2 * circ_r);
     var base_y = Math.floor(half_h - fh / 2);
@@ -1249,6 +1294,19 @@ comptoolsChordbuilder.prototype.update_chord = function () {
     };
 };
 
+comptoolsChordbuilder.prototype.add_chord_to_player = function () {
+    var self = this;
+    return function (d, i) {
+
+        if (self.current_chord !== "none" &&
+                self.current_note !== "none")
+        {
+            chord_list.push(
+                    new comptoolsChordPlayerElement(self.current_note,self.current_chord));
+        }
+    };
+};
+
 comptoolsChordbuilder.prototype.selection_callback = function () {
     return 0;
 };
@@ -1259,54 +1317,101 @@ comptoolsChordbuilder.prototype.selection_callback = function () {
 
 // The object
 function comptoolsChordPlayerElement(root, chord)
-{
+{   
     // Initialization 
     var self = this;
-    
+
     var my_chord = CHORD_LIST_ITEM_TEMPLATE.replace('{{chord-text}}', root + " " + chord);
-    
+
     this.my_root = root;
     this.my_chord = chord;
-    
+
     // Indices for duration and octave: defaults to length of 1/2 and 3rd octave
     this.duration_index = CHORD_LENGTHS.indexOf('1/2');
     this.octave_index = CHORD_OCTAVES.indexOf(3);
-    
-    this.elem_id = 'chord-list-item-'+chord_list_counter++;
-    
+
+    this.elem_id = 'chord-list-item-' + chord_list_counter++;
+
     // Add to DOM
     var chord_list_elem = d3.select("#" + CHORD_LIST_ID);
     this.list_elem = chord_list_elem.append('li')
-                      .attr('class', CHORD_LIST_ITEM_CLASS)
-                      .attr('id', this.elem_id)
-                      .html(my_chord);
+            .attr('class', CHORD_LIST_ITEM_CLASS)
+            .attr('id', this.elem_id)
+            .html(my_chord);
+
+    // Assign actions
     
+    // Length and octave controls
+    d3.select('#' + this.elem_id + ' .chord-length .chord-reduce-value')
+            .on('click', function () {
+                self.updateDuration(-1);
+            });
+
+    d3.select('#' + this.elem_id + ' .chord-length .chord-add-value')
+            .on('click', function () {
+                self.updateDuration(1);
+            });
+
+    d3.select('#' + this.elem_id + ' .chord-octave .chord-reduce-value')
+            .on('click', function () {
+                self.updateOctave(-1);
+            });
+
+    d3.select('#' + this.elem_id + ' .chord-octave .chord-add-value')
+            .on('click', function () {
+                self.updateOctave(1);
+            });
+            
+    // Delete and duplicate
+    d3.select('#' + this.elem_id + ' .chord-actions .chord-delete')
+            .on('click', function () {
+                self.delete();
+            });
+            
+    d3.select('#' + this.elem_id + ' .chord-actions .chord-duplicate')
+            .on('click', function () {
+                chord_list.push(new comptoolsChordPlayerElement(self.my_root, self.my_chord));
+            });
+
+
     // Update duration
     this.updateDuration = function(dir)
     {
         // Add to current index, check that it's within bounds
         this.duration_index += dir;
-        
-        if (this.duration_index < 0){
-            this.duration_index = 0;
-        }
-        if (this.duration_index > CHORD_LENGTHS.length){
-            this.duration_index = CHORD_LENGTHS.length;
-        }
-        
+
+        this.duration_index =
+                saturate_value(this.duration_index, 0, CHORD_LENGTHS.length - 1);
+
         // Set the appropriate value in the text box
         var my_dur = CHORD_LENGTHS[this.duration_index];
-        d3.select('.chord-option .chord-text-input').attr('value', my_dur);
-        
-    }
-    
+        d3.select('#' + this.elem_id + ' .chord-length .chord-text-input')
+                .attr('value', my_dur);
+
+    };
+
+    // Update duration
+    this.updateOctave = function(dir)
+    {
+        // Add to current index, check that it's within bounds
+        this.octave_index += dir;
+
+        this.octave_index =
+                saturate_value(this.octave_index, 0, CHORD_OCTAVES.length - 1);
+
+        // Set the appropriate value in the text box
+        var my_oct = CHORD_OCTAVES[this.octave_index];
+        d3.select('#' + this.elem_id + ' .chord-octave .chord-text-input')
+                .attr('value', my_oct);
+
+    };
+
     // Delete method
-    this.delete = function()
+    this.delete = function ()
     {
         this.list_elem.remove();
-        delete(a);
+        array_del_object(chord_list, 'elem_id', this.elem_id);
         return true;
     };
-           
-           
+
 }
