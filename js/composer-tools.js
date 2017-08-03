@@ -63,6 +63,11 @@ var CHORD_LIST_ITEM_CLASS = "chord-list-element";
 var chord_list_counter = 0;
 var chord_list = [];
 
+// Configuration object
+var comptools_config = {
+    "play_sound": true
+};
+
 // Helper functions
 
 // Saturates value so that it cannot go outside feasible bounds
@@ -88,22 +93,37 @@ function saturate_value(val, minval, maxval)
     return val;
 }
 
+// Audio context sound player
+function play_chord(note, chord, oct, len){
+        // Check if there is audio context and that sound is enabled
+        if (comptools_sound_player !== undefined && comptools_config.play_sound)
+        {
+            comptools_sound_player.triggerAttackRelease(
+                    get_chord_notes(note, chord, oct), len);
+        }
+    };
 
-// Remove object from array by property
-function array_del_object(arr, prop, val)
-{
+// Extend array with a method to search for objects by key-value pairs
+Array.prototype.find_obj_by_prop = function(key,val){
     // Find the index of the object
-    found = -1;
-    for (k=0; k<arr.length; k++)
+    var found = -1;
+    for (k=0; k<this.length; k++)
     {
-        if (arr[k][prop] === val){
-            break;
+        if (this[k][key] === val){
             found = k;
+            break;
         }
     }
-    
-    arr.splice(found, 1);
-}
+    // Return index
+    return found;
+};
+
+// Remove object from array by property
+Array.prototype.remove_obj_by_prop = function(key, val)
+{   
+    this.splice(this.find_obj_by_prop(key, val), 1);
+    return this;
+};
 
 
 // Function to return chord notes
@@ -1302,8 +1322,12 @@ comptoolsChordbuilder.prototype.add_chord_to_player = function () {
                 self.current_note !== "none")
         {
             chord_list.push(
-                    new comptoolsChordPlayerElement(self.current_note,self.current_chord));
+                    new comptoolsChordPlayerElement(self.current_note,
+                            self.current_chord));
         }
+        
+        // If there is audio context and audio is on, play the chord
+        play_chord(self.current_note, self.current_chord, 3, '3n');
     };
 };
 
@@ -1410,8 +1434,13 @@ function comptoolsChordPlayerElement(root, chord)
     this.delete = function ()
     {
         this.list_elem.remove();
-        array_del_object(chord_list, 'elem_id', this.elem_id);
+        chord_list.remove_obj_by_prop('elem_id', this.elem_id);
         return true;
     };
 
+}
+
+function comptoolsChordPlayer(player_class)
+{
+    
 }
