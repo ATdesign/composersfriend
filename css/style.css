@@ -338,9 +338,17 @@ div.fretboard-bass {
   .chord-list-element.uk-sortable-placeholder .uk-card-body {
     padding: 10px 10px; } }
 
+.chord-list-element div.uk-card {
+  border: 1px solid #fafafa; }
+
+.chord-list-element div.uk-card.chord-selected {
+  border: 1px solid #d20050; }
+
 .chord-header {
   text-align: left;
   margin-bottom: 1em; }
+  .chord-header .chord-text {
+    cursor: pointer; }
 
 .chord-option {
   width: 100%;

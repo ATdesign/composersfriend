@@ -155,6 +155,10 @@
 
             the_glue.chord_builder = my_chbuild;
             my_chbuild.selection_callback = the_glue.funHighlightChordNotes;
+            
+            // For the chord player, we must set the instrument glue config
+            // variable so that all elements know how to access the necessary function
+            comptools_config.instrument_glue = the_glue;
 
         </script>
 

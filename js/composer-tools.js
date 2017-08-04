@@ -53,7 +53,7 @@ var chord_structures = {
 };
 
 // Chord list item specific
-var CHORD_LIST_ITEM_TEMPLATE = "<div class=\"uk-card uk-card-default uk-card-body\"><div class=\"chord-header\"><span class=\"uk-sortable-handle\" uk-icon=\"icon: table\"></span> <span class=\"chord-text\">{{chord-text}}</span><br /></div><div class=\"chord-option chord-length\"><span class=\"chord-option-label\">Length:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"1/2\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span></div><div class=\"chord-option chord-octave\"><span class=\"chord-option-label\">Octave:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"3\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span></div><div class=\"chord-option chord-actions\"><span class=\"chord-controls chord-duplicate\">duplicate</span> | <span class=\"chord-controls chord-delete\">delete</span></div></div>";
+var CHORD_LIST_ITEM_TEMPLATE = "<div class=\"uk-card uk-card-default uk-card-body\"><div class=\"chord-header\"><span class=\"uk-sortable-handle\" uk-icon=\"icon: table\"></span> <span class=\"chord-text\">{{chord-text}}</span><br /></div><div class=\"chord-option chord-length\"><span class=\"chord-option-label\">Length:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"{{chord-length}}\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span></div><div class=\"chord-option chord-octave\"><span class=\"chord-option-label\">Octave:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"{{chord-octave}}\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span></div><div class=\"chord-option chord-actions\"><span class=\"chord-controls chord-duplicate\">duplicate</span> | <span class=\"chord-controls chord-delete\">delete</span></div></div>";
 var CHORD_LENGTHS = ["1/16", "1/12", "1/8", "1/6", "1/4", "1/3", "1/2", "1"];
 var CHORD_OCTAVES = [1, 2, 3, 4, 5];
 var CHORD_LIST_ID = "chord-list";
@@ -65,7 +65,9 @@ var chord_list = [];
 
 // Configuration object
 var comptools_config = {
-    "play_sound": true
+    "tempo": 120,
+    "play_sound": true,
+    "instrument_glue" : null // Reference to instrument glue.
 };
 
 // Helper functions
@@ -91,6 +93,20 @@ function saturate_value(val, minval, maxval)
     }
 
     return val;
+}
+
+// Get length in seconds based on tempo
+function get_duration_in_seconds(dur){
+    var mydur = eval(dur);
+    
+    // Check if tempo setting exists in options
+    var tempo = 120;
+    if (comptools_config.tempo !== undefined){
+        tempo = comptools_config.tempo;
+    }
+    
+    // Multiply fraction by full note length in this tempo
+    return mydur * (240 / tempo);
 }
 
 // Audio context sound player
@@ -354,6 +370,24 @@ function InstrumentGlue() {
             }
 
         }
+    };
+    
+    // Highlight all chord notes
+    this.funHighlightChordListElementNotes = function (obj)
+    {
+        // Get the notes
+        var the_notes = get_chord(obj.my_root, obj.my_chord);
+
+        for (var k = 0; k < self.objArray.length; k++) {
+                self.objArray[k].updateNotes(the_notes);
+        }
+        
+        // Get length / octave
+        var mylen = CHORD_LENGTHS[obj.duration_index];
+        var myoct = CHORD_OCTAVES[obj.octave_index];
+        
+        // Play the chord
+        play_chord(obj.my_root, obj.my_chord, myoct, get_duration_in_seconds(mylen));
     };
 }
 ;
@@ -1321,13 +1355,24 @@ comptoolsChordbuilder.prototype.add_chord_to_player = function () {
         if (self.current_chord !== "none" &&
                 self.current_note !== "none")
         {
-            chord_list.push(
-                    new comptoolsChordPlayerElement(self.current_note,
-                            self.current_chord));
+            var my_chord = new comptoolsChordPlayerElement(self.current_note,
+                            self.current_chord);
+            chord_list.push(my_chord);
+                            
+            // Because the relationship is many to one, we'll have to use
+            // a config variable here---reference to instrument glue.
+            // Therefore, it must be assigned beforehand.
+            if (comptools_config.instrument_glue !== undefined){
+                my_chord.selection_callback = 
+                        comptools_config
+                        .instrument_glue
+                        .funHighlightChordListElementNotes;
+            }
+
+            play_chord(self.current_note, self.current_chord, 3, '3n');
         }
         
-        // If there is audio context and audio is on, play the chord
-        play_chord(self.current_note, self.current_chord, 3, '3n');
+        
     };
 };
 
@@ -1340,30 +1385,51 @@ comptoolsChordbuilder.prototype.selection_callback = function () {
 // **********************************
 
 // The object
-function comptoolsChordPlayerElement(root, chord)
+function comptoolsChordPlayerElement(root, chord, dur, oct)
 {   
+    
+    // Check argument list
+    var my_dur = '1/2';
+    if (dur !== undefined)
+    {
+        my_dur = dur;
+    }
+    
+    var my_oct = 3;
+    if (oct !== undefined)
+    {
+        my_oct = oct;
+    }
+    
     // Initialization 
     var self = this;
-
-    var my_chord = CHORD_LIST_ITEM_TEMPLATE.replace('{{chord-text}}', root + " " + chord);
 
     this.my_root = root;
     this.my_chord = chord;
 
     // Indices for duration and octave: defaults to length of 1/2 and 3rd octave
-    this.duration_index = CHORD_LENGTHS.indexOf('1/2');
-    this.octave_index = CHORD_OCTAVES.indexOf(3);
+    this.duration_index = CHORD_LENGTHS.indexOf(my_dur);
+    this.octave_index = CHORD_OCTAVES.indexOf(my_oct);
 
     this.elem_id = 'chord-list-item-' + chord_list_counter++;
+
+    // Replace the values
+    var my_chord_elem = CHORD_LIST_ITEM_TEMPLATE.replace('{{chord-text}}', root + " " + chord);
+    my_chord_elem = my_chord_elem.replace('{{chord-length}}', my_dur);
+    my_chord_elem = my_chord_elem.replace('{{chord-octave}}', my_oct);
 
     // Add to DOM
     var chord_list_elem = d3.select("#" + CHORD_LIST_ID);
     this.list_elem = chord_list_elem.append('li')
             .attr('class', CHORD_LIST_ITEM_CLASS)
             .attr('id', this.elem_id)
-            .html(my_chord);
+            .html(my_chord_elem);
 
     // Assign actions
+    
+    // Chord selection
+    d3.select("#" + this.elem_id + ' .chord-header .chord-text')
+            .on('click', this.clickHandler());
     
     // Length and octave controls
     d3.select('#' + this.elem_id + ' .chord-length .chord-reduce-value')
@@ -1394,7 +1460,18 @@ function comptoolsChordPlayerElement(root, chord)
             
     d3.select('#' + this.elem_id + ' .chord-actions .chord-duplicate')
             .on('click', function () {
-                chord_list.push(new comptoolsChordPlayerElement(self.my_root, self.my_chord));
+            // Get duration and octave by indices
+            var dup_dur = CHORD_LENGTHS[self.duration_index];
+            var dup_oct = CHORD_OCTAVES[self.octave_index];
+            var my_chord = new comptoolsChordPlayerElement(self.my_root,
+                            self.my_chord, dup_dur, dup_oct);
+            chord_list.push(my_chord);
+            if (comptools_config.instrument_glue !== undefined){
+                my_chord.selection_callback = 
+                        comptools_config
+                        .instrument_glue
+                        .funHighlightChordListElementNotes;
+            }
             });
 
 
@@ -1438,6 +1515,40 @@ function comptoolsChordPlayerElement(root, chord)
         return true;
     };
 
+}
+
+// Note selection callback
+comptoolsChordPlayerElement.prototype.clickHandler = function ()
+{
+    var self = this;
+    return function (d, i) {
+        
+        var the_elem = this.parentElement.parentElement;
+        var action = !d3.select(the_elem).classed("chord-selected");
+        
+        // Remove all other selections
+        d3.selectAll('.chord-list-element .uk-card').classed('chord-selected', false);
+        
+        // Assign selection
+        d3.select(the_elem).classed("chord-selected", action);
+        
+        // Check if the chord list exists and envoke the selection_callback
+        if (chord_list !== undefined){
+            // Pass the object reference to selection callback
+            var my_elem_id = d3.select(the_elem.parentElement).attr('id');
+            var my_obj = chord_list[
+                chord_list.find_obj_by_prop('elem_id', my_elem_id)];
+            my_obj.selection_callback(my_obj);
+        }
+        else{
+            console.log('Chord list (chord_list) is not found in scope.');
+        }
+    };
+};
+
+comptoolsChordPlayerElement.prototype.selection_callback = function(my_obj)
+{
+    return null;
 }
 
 function comptoolsChordPlayer(player_class)
