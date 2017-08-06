@@ -37,10 +37,16 @@ var note_array = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#',
 var chord_structures = {
     "maj": [4, 7],
     "maj6": [4, 7, 9],
+    "maj6add9": [4, 7, 9, 14],
     "maj7": [4, 7, 11],
+    "maj9": [4, 7, 11, 14],
     "dom7": [4, 7, 10],
     "dom7aug5": [4, 8, 10],
     "dom7sus4": [5, 7, 10],
+    "dom9": [4, 7, 10, 14],
+    "dom9sus4": [5, 7, 10, 14],
+    "dom11": [4, 7, 10, 14, 17],
+    "dom13": [4, 7, 10, 14, 17, 21],
     "aug": [4, 8],
     "min": [3, 7],
     "min6": [3, 7, 9],
@@ -49,7 +55,8 @@ var chord_structures = {
     "dim": [3, 6],
     "dim7": [3, 6, 9],
     "sus4": [5, 7],
-    "sus2": [2, 7]
+    "sus2": [2, 7],
+    "add9": [4, 7, 14], 
 };
 
 // Chord list item specific
@@ -165,12 +172,12 @@ function get_chord_notes(note, chord, oct)
         oct = 3;
     }
 
-    // Generate an octave worth of notes to work with
+    // Generate an couple of octaves worth of notes to work with
     var my_n = note_array.indexOf(note.toUpperCase());
     var fi_n = my_n;
     var now_notes = new Array();
 
-    for (j = 0; j < 12; j++)
+    for (j = 0; j < 24; j++)
     {
         now_note = note_array[(fi_n + j) % note_array.length];
         now_notes.push(now_note + oct);
@@ -1262,7 +1269,7 @@ function comptoolsChordbuilder(cont_class) {
     var base_y = Math.floor(half_h - fh / 2);
     var base_x = Math.floor(2 * half_h + 2 * circ_r);
     var base_dn = Math.floor((fh - 2 * CHBUILD_GRID_Y * circ_r) / (CHBUILD_GRID_Y - 1) + 2 * circ_r);
-    var base_w = 7 * circ_r;
+    var base_w = 6 * circ_r;
     var add_x = 0, add_y;
 
     // The keys
