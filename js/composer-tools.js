@@ -52,15 +52,19 @@ var chord_structures = {
     "min6": [3, 7, 9],
     "min7": [3, 7, 10],
     "min7b5": [3, 6, 10],
+    "min9": [3, 7, 10, 14],
+    "min11": [3, 7, 10, 14, 17],
     "dim": [3, 6],
     "dim7": [3, 6, 9],
     "sus4": [5, 7],
     "sus2": [2, 7],
-    "add9": [4, 7, 14], 
+    "add9": [4, 7, 14]
 };
 
 // Chord list item specific
-var CHORD_LIST_ITEM_TEMPLATE = "<div class=\"uk-card uk-card-default uk-card-body\"><div class=\"chord-header\"><span class=\"uk-sortable-handle\" uk-icon=\"icon: table\"></span> <span class=\"chord-text\">{{chord-text}}</span><br /></div><div class=\"chord-option chord-length\"><span class=\"chord-option-label\">Length:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"{{chord-length}}\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span></div><div class=\"chord-option chord-octave\"><span class=\"chord-option-label\">Octave:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"{{chord-octave}}\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span></div><div class=\"chord-option chord-actions\"><span class=\"chord-controls chord-duplicate\">duplicate</span> | <span class=\"chord-controls chord-delete\">delete</span></div></div>";
+var CHORD_LIST_TEMPLATE = "<ul id=\"chord-list\" class=\"uk-grid-small uk-child-width-1-3 uk-child-width-1-4@s uk-text-center\" uk-sortable=\"handle: .uk-sortable-handle\" uk-grid></ul>";
+var CHORD_LIST_CONTROL_TEMPLATE = "<div class=\"chord-player-controls\"><span class=\"chord-play\">Play</span> @ <input class=\"chord-bpm\" type=\"text\" value=\"{{chord-bpm}}\"> bpm</div>";
+var CHORD_LIST_ITEM_TEMPLATE = "<div class=\"uk-card uk-card-default uk-card-body\"><div class=\"chord-header\"><span class=\"uk-sortable-handle\" uk-icon=\"icon: table\"></span> <span class=\"chord-text\">{{chord-text}}</span> | <span class=\"chord-legato\">leg.</span><br /></div><div class=\"chord-option chord-length\"><span class=\"chord-option-label\">Length:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"{{chord-length}}\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span></div><div class=\"chord-option chord-octave\"><span class=\"chord-option-label\">Octave:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"{{chord-octave}}\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span></div><div class=\"chord-option chord-actions\"><span class=\"chord-controls chord-duplicate\">duplicate</span> | <span class=\"chord-controls chord-delete\">delete</span></div></div>";
 var CHORD_LENGTHS = ["1/16", "1/12", "1/8", "1/6", "1/4", "1/3", "1/2", "1"];
 var CHORD_OCTAVES = [1, 2, 3, 4, 5];
 var CHORD_LIST_ID = "chord-list";
@@ -69,6 +73,9 @@ var CHORD_LIST_ITEM_CLASS = "chord-list-element";
 // Global counter and chord placeholder
 var chord_list_counter = 0;
 var chord_list = [];
+
+// Play event order
+var chord_play_events = [];
 
 // Configuration object
 var comptools_config = {
@@ -84,12 +91,12 @@ function saturate_value(val, minval, maxval)
 {
     if (minval === undefined) {
         minval = -1;
-        console.log('Minimum saturation value is undefined! Check your code.');
+        console.log('Minimum saturation value is undefined! Using defaults.');
     }
 
     if (maxval === undefined) {
         maxval = 1;
-        console.log('Maximum saturation value is undefined! Check your code.');
+        console.log('Maximum saturation value is undefined! Using defaults.');
     }
 
     if (val < minval) {
@@ -319,6 +326,8 @@ function flats2sharps(notes) {
 // This is a glue object for drawing all selected notes on all
 // instruments that the object enumerator contains.
 
+// This ought to be replaced with an event dispatcher/signal model.
+
 // Create the object...
 function InstrumentGlue() {
     // ... and push single note update functions here
@@ -380,9 +389,10 @@ function InstrumentGlue() {
     };
     
     // Highlight all chord notes
-    this.funHighlightChordListElementNotes = function (obj)
+    this.funHighlightChordListElementNotes = function (obj, act)
     {
-        // Get the notes
+        if (act){
+            // Get the notes
         var the_notes = get_chord(obj.my_root, obj.my_chord);
 
         for (var k = 0; k < self.objArray.length; k++) {
@@ -395,6 +405,14 @@ function InstrumentGlue() {
         
         // Play the chord
         play_chord(obj.my_root, obj.my_chord, myoct, get_duration_in_seconds(mylen));
+        
+        }
+        else{
+            for (var k = 0; k < self.objArray.length; k++) {
+                self.objArray[k].clearNotes(the_notes);
+        }
+        }
+        
     };
 }
 ;
@@ -1417,6 +1435,9 @@ function comptoolsChordPlayerElement(root, chord, dur, oct)
     // Indices for duration and octave: defaults to length of 1/2 and 3rd octave
     this.duration_index = CHORD_LENGTHS.indexOf(my_dur);
     this.octave_index = CHORD_OCTAVES.indexOf(my_oct);
+    
+    // Whether to use legato with several same chords
+    this.legato = false;
 
     this.elem_id = 'chord-list-item-' + chord_list_counter++;
 
@@ -1433,6 +1454,14 @@ function comptoolsChordPlayerElement(root, chord, dur, oct)
             .html(my_chord_elem);
 
     // Assign actions
+    
+    // Legato
+    d3.select("#" + this.elem_id + ' .chord-legato')
+            .on('click', function(){
+                self.legato = !self.legato;
+                d3.select(this).classed('selected', self.legato);
+                    }
+    );
     
     // Chord selection
     d3.select("#" + this.elem_id + ' .chord-header .chord-text')
@@ -1530,6 +1559,8 @@ comptoolsChordPlayerElement.prototype.clickHandler = function ()
     var self = this;
     return function (d, i) {
         
+        // TODO: This solution is quite poor in general since how do we know 
+        // which is the parent element and whether it is the correct one?
         var the_elem = this.parentElement.parentElement;
         var action = !d3.select(the_elem).classed("chord-selected");
         
@@ -1545,7 +1576,7 @@ comptoolsChordPlayerElement.prototype.clickHandler = function ()
             var my_elem_id = d3.select(the_elem.parentElement).attr('id');
             var my_obj = chord_list[
                 chord_list.find_obj_by_prop('elem_id', my_elem_id)];
-            my_obj.selection_callback(my_obj);
+            my_obj.selection_callback(my_obj, action);
         }
         else{
             console.log('Chord list (chord_list) is not found in scope.');
@@ -1560,5 +1591,66 @@ comptoolsChordPlayerElement.prototype.selection_callback = function(my_obj)
 
 function comptoolsChordPlayer(player_class)
 {
+    // TODO: Add import/export of JSON, and export of MIDI
     
+    var self = this;
+    
+    this.playing = false;       // Player state
+    this.current_chord = 0;     // Currently selected chord, updates on play
+    
+    // Get tempo from config file if there is one
+    var my_tempo = 120; // Defaults to 120 bpm
+    if (comptools_config.tempo !== undefined){
+        my_tempo = comptools_config.tempo;
+    }
+    
+    // Add the basic controls first
+    d3.select(player_class).html(
+            d3.select(player_class).html()
+            + CHORD_LIST_CONTROL_TEMPLATE.replace("{{chord-bpm}}", my_tempo));
+    
+    // Finally, add the container
+    d3.select(player_class).html(
+            d3.select(player_class).html() + CHORD_LIST_TEMPLATE);
+    
+    // Assign controls
+    d3.select(player_class + ' .chord-play').on('click', function(){
+        self.togglePlay();
+    });
+    
+    // Event: begin play
+    this.togglePlay = function(){
+        
+        // Toggle play state
+        this.playing = !this.playing;
+        d3.select(player_class + ' .chord-play')
+                .classed('selected', this.playing);;
+        
+        // Parse tempo and update it in the config file if needed
+        var now_tempo = d3.select(player_class + ' .chord-bpm')
+                .property('value');
+        
+        // Convert to integer and store value in the configuration object
+        if (comptools_config.tempo !== undefined){
+            comptools_config.tempo = parseInt(now_tempo);
+        }
+        
+        // Return early if there is nothing to play
+        if (chord_list === undefined || chord_list.length == 0){
+            // Disable play button
+            d3.select(player_class + ' .chord-play').classed('selected', false);
+            return null;
+        }
+        
+        // Get the current order
+        var play_order = [];
+        d3.selectAll('#chord-list .chord-list-element').
+                each(function(){
+                    play_order.push(d3.select(this).attr('id'));
+        });
+        
+        // TODO: Create the event list
+        
+    }
 }
+

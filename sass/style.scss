@@ -275,12 +275,6 @@ div.fretboard-bass{
     .uk-card-body {
         padding: 5px 5px;
     }
-    
-    @media (min-width: 1200px) {
-        .uk-card-body {
-            padding: 10px 10px;
-        }
-    }
 }
 
 .chord-list-element div.uk-card{
@@ -290,6 +284,12 @@ div.fretboard-bass{
 .chord-list-element div.uk-card.chord-selected{
     border: 1px solid #d20050;
 }
+
+/* Override rule ...*/
+#chord-list.uk-child-width-1-3 > *{
+    width: 25% !important;
+}
+
 
 .chord-header{
     text-align: left;
@@ -318,5 +318,38 @@ div.fretboard-bass{
     
     .chord-delete{
         color: red;
+    }
+}
+
+.chord-legato{
+    font-size: 0.8em;
+    background: #fafafa;
+    color: #666;
+    cursor: pointer;
+    padding: 2px;
+}
+
+.chord-legato.selected{
+    background: #666;
+    color: #fafafa;
+}
+
+.chord-player .chord-player-controls{
+    width: 100%;
+    text-align: center;
+    height: 40px;
+    margin-bottom: 10px;
+    border-bottom: 1px dotted #666;
+    .chord-play{
+        border: 1px solid #fff;
+        margin: 5px;
+        padding: 5px;
+        cursor: pointer;
+    }
+    .chord-play.selected{
+        border: 1px solid #d20050;
+    }
+    .chord-bpm{
+        width: 50px;
     }
 }
