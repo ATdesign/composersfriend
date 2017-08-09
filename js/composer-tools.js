@@ -1655,7 +1655,7 @@ function comptoolsChordPlayer(player_class)
         // Check if playing is stopped
         if (!this.playing){
             // Clear timeout
-            clearTimeout(update_timer);
+            clearTimeout(this.update_timer);
             return true;
         }
         
@@ -1793,7 +1793,7 @@ function comptoolsChordPlayer(player_class)
        // Schedule next processing event
        // NB! TODO: this implementation is imprecise. For higher quality, use
        // Tone.js's built-in timing facilities with timer oversampling
-       this.update_timer = setTimeout(self.process_events, 
+       self.update_timer = setTimeout(self.process_events, 
                                 current_event.interval);
        
        
