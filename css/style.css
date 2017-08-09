@@ -367,14 +367,12 @@ div.fretboard-bass {
 
 .chord-legato {
   font-size: 0.8em;
-  background: #fafafa;
-  color: #666;
+  border: 1px solid #fff;
   cursor: pointer;
-  padding: 2px; }
+  padding: 3px; }
 
 .chord-legato.selected {
-  background: #666;
-  color: #fafafa; }
+  border: 1px solid #666; }
 
 .chord-player .chord-player-controls {
   width: 100%;

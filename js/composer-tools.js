@@ -123,6 +123,10 @@ function get_duration_in_seconds(dur){
     return mydur * (240 / tempo);
 }
 
+function get_duration_in_ms(dur){    
+    return 1000 * get_duration_in_seconds(dur);
+}
+
 // Audio context sound player
 function play_chord(note, chord, oct, len){
         // Check if there is audio context and that sound is enabled
@@ -1239,9 +1243,9 @@ function comptoolsChordbuilder(cont_class) {
     var half_h = Math.floor(chordbuild_h / 2);
     var th_h = Math.floor(2 * chordbuild_h / 5);
 
-    // Initial angle is -PI/2
+    // Initial angle is -PI
     var the_x, the_y;
-    var ang = -Math.PI / 2;
+    var ang = - Math.PI;
     var dang = 2 * Math.PI / note_array.length;
 
     var now_g;
@@ -1565,7 +1569,7 @@ comptoolsChordPlayerElement.prototype.clickHandler = function ()
         var action = !d3.select(the_elem).classed("chord-selected");
         
         // Remove all other selections
-        d3.selectAll('.chord-list-element .uk-card').classed('chord-selected', false);
+        d3.selectAll('.' + CHORD_LIST_ITEM_CLASS + ' .uk-card').classed('chord-selected', false);
         
         // Assign selection
         d3.select(the_elem).classed("chord-selected", action);
@@ -1643,13 +1647,37 @@ function comptoolsChordPlayer(player_class)
         }
         
         // Get the current order
-        var play_order = [];
-        d3.selectAll('#chord-list .chord-list-element').
+        var play_order_ids = [];
+        d3.selectAll('#' + CHORD_LIST_ID + ' .' + CHORD_LIST_ITEM_CLASS).
                 each(function(){
-                    play_order.push(d3.select(this).attr('id'));
+                    play_order_ids.push(d3.select(this).attr('id'));
         });
         
-        // TODO: Create the event list
+        // Go through all id's and find a selected chord,
+        // if any; defaults to first chord
+        var my_elem, chord_selected = play_order_ids[0];
+        for (k=0; k<play_order_ids.length; k++){
+            if (d3.select('#' + CHORD_LIST_ID + ' #'
+                    + play_order_ids[k] + ' div.uk-card')
+                        .classed('chord-selected')){
+                    chord_selected = play_order_ids[k];
+                    break;
+                    }
+            
+        }
+        
+        // NB! Note that chords marked as "legato" will NOT play if they are
+        // selected and represent an actual continuation of the previous
+        // chord(s). Thus, the user must always select the first chord in the
+        // series to hear the full duration. (TODO: Maybe fix this?)
+        
+        // Create the event list
+        var current_chord;
+        
+        chord_play_events = [];  // Remove old entries
+        for (k=0; k<play_order_ids.length; k++){
+            
+        }
         
     }
 }
