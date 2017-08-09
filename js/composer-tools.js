@@ -136,12 +136,22 @@ function play_chord(note, chord, oct, len){
                     get_chord_notes(note, chord, oct), len);
         }
     };
+    
+// Audio context sound player
+function player_play_chord(notes, len){
+        
+        // Play the sound
+        if (comptools_sound_player !== undefined && comptools_config.play_sound)
+        {
+            comptools_sound_player.triggerAttackRelease(notes, len);
+        }
+    };
 
 // Extend array with a method to search for objects by key-value pairs
 Array.prototype.find_obj_by_prop = function(key,val){
     // Find the index of the object
     var found = -1;
-    for (k=0; k<this.length; k++)
+    for (var k=0; k<this.length; k++)
     {
         if (this[k][key] === val){
             found = k;
@@ -151,6 +161,10 @@ Array.prototype.find_obj_by_prop = function(key,val){
     // Return index
     return found;
 };
+
+Array.prototype.get_obj_by_prop = function(key,val){
+    return this[this.find_obj_by_prop(key, val)];
+}
 
 // Remove object from array by property
 Array.prototype.remove_obj_by_prop = function(key, val)
@@ -168,7 +182,7 @@ function get_chord(note, chord)
 
     var my_notes = new Array();
     my_notes.push(note);
-    for (k = 0; k < my_c.length; k++) {
+    for (var k = 0; k < my_c.length; k++) {
         my_notes.push(note_array[(my_n + my_c[k]) % note_array.length]);
     }
     return my_notes;
@@ -188,7 +202,7 @@ function get_chord_notes(note, chord, oct)
     var fi_n = my_n;
     var now_notes = new Array();
 
-    for (j = 0; j < 24; j++)
+    for (var j = 0; j < 24; j++)
     {
         now_note = note_array[(fi_n + j) % note_array.length];
         now_notes.push(now_note + oct);
@@ -200,7 +214,7 @@ function get_chord_notes(note, chord, oct)
 
     var my_notes = new Array();
     my_notes.push(now_notes[0]);
-    for (k = 0; k < my_c.length; k++) {
+    for (var k = 0; k < my_c.length; k++) {
         my_notes.push(now_notes[my_c[k]]);
     }
     return my_notes;
@@ -255,7 +269,7 @@ function get_scale(note, scale) {
     // Locate the scale, if it is present
     if (scale_defs.hasOwnProperty(scale)) {
         var my_pattern = scale_defs[scale]["ints"];
-        for (k = 0; k <= my_pattern.length; k++)
+        for (var k = 0; k <= my_pattern.length; k++)
         {
             my_scale.push(my_notes[ind]);
             ind = (ind + my_pattern[k]) % my_notes.length;
@@ -290,7 +304,7 @@ function sharps2flats(notes) {
         return_array = false;
     }
     var new_notes = new Array();
-    for (k = 0; k < notes.length; k++) {
+    for (var k = 0; k < notes.length; k++) {
         if (notes[k].indexOf("#") !== -1) {
             var pt_index = pure_tones.indexOf(notes[k][0]);
             new_notes.push(pure_tones[(pt_index + 1) % pure_tones.length] + "b");
@@ -311,7 +325,7 @@ function flats2sharps(notes) {
         return_array = false;
     }
     var new_notes = new Array();
-    for (k = 0; k < notes.length; k++) {
+    for (var k = 0; k < notes.length; k++) {
         if (notes[k].indexOf("b") !== -1) {
             var pt_index = pure_tones.indexOf(notes[k][0]) - 1;
             if (pt_index < 0) {
@@ -324,6 +338,20 @@ function flats2sharps(notes) {
         }
     }
     return return_array ? new_notes : new_notes[0];
+}
+
+// Define a function for returning the semitone distance from B-1
+function get_semitone_distance(note) {
+    note = note.toUpperCase();
+    match = note_scinot.exec(note);
+    return note_array.indexOf(match[1]) + 1 + (12 * parseInt(match[2]));
+}
+
+// The same for whole tones
+function get_tone_distance(note) {
+    note = note.toUpperCase();
+    match = note_scifnot.exec(note);
+    return note_array.indexOf(match[1]) + 1 + (7 * parseInt(match[2]));
 }
 
 
@@ -403,12 +431,9 @@ function InstrumentGlue() {
                 self.objArray[k].updateNotes(the_notes);
         }
         
-        // Get length / octave
-        var mylen = CHORD_LENGTHS[obj.duration_index];
-        var myoct = CHORD_OCTAVES[obj.octave_index];
-        
         // Play the chord
-        play_chord(obj.my_root, obj.my_chord, myoct, get_duration_in_seconds(mylen));
+        play_chord(obj.my_root, obj.my_chord, obj.get_oct(),
+                    get_duration_in_seconds(obj.get_dur()));
         
         }
         else{
@@ -421,19 +446,6 @@ function InstrumentGlue() {
 }
 ;
 
-// Define a function for returning the semitone distance from B-1
-function get_semitone_distance(note) {
-    note = note.toUpperCase();
-    match = note_scinot.exec(note);
-    return note_array.indexOf(match[1]) + 1 + (12 * parseInt(match[2]));
-}
-
-// The same for whole tones
-function get_tone_distance(note) {
-    note = note.toUpperCase();
-    match = note_scifnot.exec(note);
-    return note_array.indexOf(match[1]) + 1 + (7 * parseInt(match[2]));
-}
 
 // The basic theoretical tools. Currently in fixed layout.
 function comptoolsTheory(cont_id) {
@@ -590,7 +602,7 @@ function comptoolsTheory(cont_id) {
         // Preprocess notes
         var new_notes = new Array();
         var display_what = 'f'; // Display flats by default
-        for (k = 0; k < notes.length; k++) {
+        for (var k = 0; k < notes.length; k++) {
             if (notes[k].indexOf("#") !== -1) {
                 display_what = 's';
             }
@@ -604,7 +616,7 @@ function comptoolsTheory(cont_id) {
         }
 
         var the_class = ".clef-" + display_what + "-";
-        for (k = 0; k < new_notes.length; k++) {
+        for (var k = 0; k < new_notes.length; k++) {
             if (new_notes[k].indexOf("!") !== -1) {
                 var class_to_select = the_class + new_notes[k][0].toLowerCase();
                 this.svg_theory.selectAll(class_to_select)
@@ -615,7 +627,7 @@ function comptoolsTheory(cont_id) {
     };
 
     this.clearAccidentals = function () {
-        for (k = 1; k <= 7; k++) {
+        for (var k = 1; k <= 7; k++) {
             this.svg_theory.select('#clef-s' + k)
                     .classed("visible-accidental", false);
             this.svg_theory.select('#clefb-s' + k)
@@ -750,7 +762,7 @@ function comptoolsKeyboard(cont_class, range, options) {
 
     bl_buffer = new Array(); // Yes, you read correctly. BLACK BUFFER. ffs.
     curr_x_pos = 1;
-    for (k = 0; k < keys_to_draw; k++) {
+    for (var k = 0; k < keys_to_draw; k++) {
 
         // Get note
         curr_note = note_array[(note_ptr + k) % (note_array.length)].toLowerCase();
@@ -978,7 +990,7 @@ function comptoolsFretboard(cont_class, tuning, options) {
     fret_x_coord += now_fret_size + 1;
 
     // Now, we generate all other frets
-    for (n = 1; n < fretCount; n++) {
+    for (var n = 1; n < fretCount; n++) {
 
         var now_fret_size = Math.floor(firstFretWidth * Math.exp(-0.0655 * n));
         centerPos.push(Math.floor(fret_x_coord + now_fret_size / 2));
@@ -1075,7 +1087,7 @@ function comptoolsFretboard(cont_class, tuning, options) {
         first_note = note_array.indexOf(this.fret_notes.note[i]);
         first_note_index = parseInt(this.fret_notes.index[i]);
         half_fret_marker_size = Math.floor(fret_marker_size / 2);
-        for (j = 0; j < centerPos.length; j++)
+        for (var j = 0; j < centerPos.length; j++)
         {
             now_note = note_array[(first_note + j) % note_array.length];
             now_note_class = "note-" + now_note.replace("#", "s").toLowerCase();
@@ -1130,7 +1142,7 @@ function comptoolsFretboard(cont_class, tuning, options) {
         // introduce relevant text changes
         var is_flats = false;
         // TODO: make universal, use count_sharps function instead of this
-        for (k = 0; k < notes.length; k++) {
+        for (var k = 0; k < notes.length; k++) {
             if (notes[k].indexOf("b") !== -1)
                 is_flats = true;
         }
@@ -1440,6 +1452,15 @@ function comptoolsChordPlayerElement(root, chord, dur, oct)
     this.duration_index = CHORD_LENGTHS.indexOf(my_dur);
     this.octave_index = CHORD_OCTAVES.indexOf(my_oct);
     
+    // Also methods to get actual values
+    this.get_dur = function(){
+        return CHORD_LENGTHS[this.duration_index];
+    };
+    
+    this.get_oct = function(){
+        return CHORD_OCTAVES[this.octave_index];
+    };
+    
     // Whether to use legato with several same chords
     this.legato = false;
 
@@ -1599,8 +1620,9 @@ function comptoolsChordPlayer(player_class)
     
     var self = this;
     
-    this.playing = false;       // Player state
-    this.current_chord = 0;     // Currently selected chord, updates on play
+    this.playing = false;           // Player state
+    this.current_event_index = 0;   // Event index for the scheduler
+    this.update_timer;              // Needed to schedule chord changes
     
     // Get tempo from config file if there is one
     var my_tempo = 120; // Defaults to 120 bpm
@@ -1630,6 +1652,13 @@ function comptoolsChordPlayer(player_class)
         d3.select(player_class + ' .chord-play')
                 .classed('selected', this.playing);;
         
+        // Check if playing is stopped
+        if (!this.playing){
+            // Clear timeout
+            clearTimeout(update_timer);
+            return true;
+        }
+        
         // Parse tempo and update it in the config file if needed
         var now_tempo = d3.select(player_class + ' .chord-bpm')
                 .property('value');
@@ -1655,15 +1684,14 @@ function comptoolsChordPlayer(player_class)
         
         // Go through all id's and find a selected chord,
         // if any; defaults to first chord
-        var my_elem, chord_selected = play_order_ids[0];
-        for (k=0; k<play_order_ids.length; k++){
+        var my_elem, chord_selected = 0;
+        for (var k=0; k<play_order_ids.length; k++){
             if (d3.select('#' + CHORD_LIST_ID + ' #'
                     + play_order_ids[k] + ' div.uk-card')
                         .classed('chord-selected')){
-                    chord_selected = play_order_ids[k];
+                    chord_selected = k;
                     break;
                     }
-            
         }
         
         // NB! Note that chords marked as "legato" will NOT play if they are
@@ -1672,13 +1700,103 @@ function comptoolsChordPlayer(player_class)
         // series to hear the full duration. (TODO: Maybe fix this?)
         
         // Create the event list
-        var current_chord;
+        var current_chord, unchanged_chord;
+        var unchanged_chord_event_ind = 0;  // This is used to update lengths
         
         chord_play_events = [];  // Remove old entries
-        for (k=0; k<play_order_ids.length; k++){
+        for (var k=0; k<play_order_ids.length; k++){
+
+            current_chord = chord_list.get_obj_by_prop('elem_id', 
+                    play_order_ids[k]);
             
+            // Store the first chord to unchanged_chord so we can update
+            // it with additional length if legatos are used in sequence
+            if (k === 0) {
+                unchanged_chord = current_chord;
+                unchanged_chord_event_ind = 0;
+            }
+            
+            // Check whether this chord is the same as unchanged_chord and there
+            // is a legato mark present (for all chords after the first one)
+            var do_legato = false;
+            if (k > 0 && current_chord.my_root === unchanged_chord.my_root &&
+                    current_chord.my_chord === unchanged_chord.my_chord &&
+                    current_chord.legato){
+                do_legato = true;
+            }
+            
+            // For speed, figure most things out in advance
+            
+            var my_event = {
+                "highlight_id": current_chord.elem_id,
+                "chord_notes": get_chord_notes(current_chord.my_root, 
+                            current_chord.my_chord, current_chord.get_oct()),
+                "highlight_notes": get_chord(current_chord.my_root, 
+                                        current_chord.my_chord),
+                "duration": get_duration_in_seconds(current_chord.get_dur()),
+                "interval": get_duration_in_ms(current_chord.get_dur()),
+                "legato": do_legato
+            };
+            
+            chord_play_events.push(my_event);
+            
+            // Legato?
+            if (do_legato){
+                chord_play_events[unchanged_chord_event_ind].duration +=
+                        get_duration_in_seconds(current_chord.get_dur());
+            }else{
+                unchanged_chord = current_chord;
+                unchanged_chord_event_ind = k;
+            }
+
         }
         
-    }
+        // Start processing the events
+        this.current_event_index = chord_selected;
+        this.process_events();
+        
+    };
+    
+    this.process_events = function(){
+
+       var current_event = chord_play_events[self.current_event_index++];
+
+       // Repeat
+       if (self.current_event_index >= chord_play_events.length){
+           self.current_event_index = 0;
+       }
+
+       // Deselect all chords
+       d3.selectAll('.' + CHORD_LIST_ITEM_CLASS + ' div.uk-card')
+               .classed('chord-selected', false);
+       
+       // Select this chord
+       d3.select('#' + current_event.highlight_id + " div.uk-card")
+               .classed('chord-selected', true);
+       
+       // Start playing the chord, if not legato
+       if (!current_event.legato){
+           // Play the notes
+           player_play_chord(current_event.chord_notes, current_event.duration);
+           
+           // Also highlight the notes
+           if (comptools_config.instrument_glue !== undefined){
+               var my_glue = comptools_config.instrument_glue;
+                for (var k = 0; k < my_glue.objArray.length; k++) {
+                     my_glue.objArray[k]
+                             .updateNotes(current_event.highlight_notes);
+                }
+           }
+           
+       }
+       
+       // Schedule next processing event
+       // NB! TODO: this implementation is imprecise. For higher quality, use
+       // Tone.js's built-in timing facilities with timer oversampling
+       this.update_timer = setTimeout(self.process_events, 
+                                current_event.interval);
+       
+       
+    };
 }
 
