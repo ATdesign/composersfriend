@@ -378,8 +378,7 @@ div.fretboard-bass {
   width: 100%;
   text-align: center;
   height: 40px;
-  margin-bottom: 10px;
-  border-bottom: 1px dotted #666; }
+  margin-bottom: 5px; }
   .chord-player .chord-player-controls .chord-play {
     border: 1px solid #fff;
     margin: 5px;
@@ -389,5 +388,22 @@ div.fretboard-bass {
     border: 1px solid #d20050; }
   .chord-player .chord-player-controls .chord-bpm {
     width: 50px; }
+
+.chord-player .chord-player-timeline {
+  width: 720px;
+  height: 16px;
+  margin: auto;
+  padding: 0 1px 0 1px;
+  display: block;
+  margin-bottom: 15px;
+  background: #eee; }
+  .chord-player .chord-player-timeline .timeline-element {
+    background: #fff;
+    border: 1px solid #000;
+    margin: 1px 0 0 1px;
+    height: 11px;
+    float: left; }
+  .chord-player .chord-player-timeline .timeline-element.selected {
+    background: #d20050; }
 
 /*# sourceMappingURL=style.css.map */

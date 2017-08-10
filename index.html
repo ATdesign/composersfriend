@@ -100,7 +100,7 @@
 
             fb_guitar = new comptoolsFretboard(".fb-guitar", "E4B3G3D3A2E2");
             
-            fb_chplayer = new comptoolsChordPlayer('.chord-player');
+            my_chplayer = new comptoolsChordPlayer('.chord-player');
 
             // Options for the bass
             bass_options = {"firstFretWidth": 70,
@@ -128,6 +128,14 @@
             // For the chord player, we must set the instrument glue config
             // variable so that all elements know how to access the necessary function
             comptools_config.instrument_glue = the_glue;
+            comptools_config.chord_player = my_chplayer;
+
+            // Finally, we need to assign a handler to the sortable component
+            // since when the order is changed, the timeline must be redrawn
+            // in chord player.
+            $('#chord-list').on('change', function () {
+                my_chplayer.update_callback();
+            });
 
         </script>
 
