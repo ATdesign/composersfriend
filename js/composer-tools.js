@@ -63,7 +63,7 @@ var chord_structures = {
 
 // Chord list item specific
 var CHORD_LIST_TEMPLATE = "<ul id=\"chord-list\" class=\"uk-grid-small uk-child-width-1-3 uk-child-width-1-4@s uk-text-center\" uk-sortable=\"handle: .uk-sortable-handle\" uk-grid></ul>";
-var CHORD_LIST_CONTROL_TEMPLATE = "<div class=\"chord-player-controls\"><span class=\"chord-play\">Play</span> @ <input class=\"chord-bpm\" type=\"text\" value=\"{{chord-bpm}}\"> bpm</div><div class=\"chord-player-timeline\"></div>";
+var CHORD_LIST_CONTROL_TEMPLATE = "<div class=\"chord-player-controls\"><span class=\"chord-play\">Play</span> @ <input class=\"chord-bpm\" type=\"text\" value=\"{{chord-bpm}}\"> bpm</div><div class=\"chord-player-timeline\"></div><div class=\"chord-player-timeline-measures\"></div>";
 var CHORD_LIST_ITEM_TEMPLATE = "<div class=\"uk-card uk-card-default uk-card-body\"><div class=\"chord-header\"><span class=\"uk-sortable-handle\" uk-icon=\"icon: table\"></span> <span class=\"chord-text\">{{chord-text}}</span> | <span class=\"chord-legato\">leg.</span><br /></div><div class=\"chord-option chord-length\"><span class=\"chord-option-label\">Length:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"{{chord-length}}\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span></div><div class=\"chord-option chord-octave\"><span class=\"chord-option-label\">Octave:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"{{chord-octave}}\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span></div><div class=\"chord-option chord-actions\"><span class=\"chord-controls chord-duplicate\">duplicate</span> | <span class=\"chord-controls chord-delete\">delete</span></div></div>";
 var CHORD_LENGTHS = ["1/16", "1/12", "1/8", "1/6", "1/4", "1/3", "1/2", "1"];
 var CHORD_OCTAVES = [1, 2, 3, 4, 5];
@@ -81,6 +81,7 @@ var chord_play_events = [];
 // Configuration object
 var comptools_config = {
     "tempo": 120,
+    "time_signature": "4/4",
     "play_sound": true,
     "instrument_glue": null, // Reference to instrument glue.
     "chord_player": null // Reference to chord player.
@@ -192,6 +193,12 @@ function get_chord(note, chord)
     return my_notes;
 }
 
+// This function only parses the string at this point, e.g., "4/4".
+// TODO: Make a better implementation with validity checking
+function parse_time_signature(ts) {
+    return [parseInt(ts.split("/")[0]), parseInt(ts.split("/")[1])];
+}
+
 // Function to return chord notes
 function get_chord_notes(note, chord, oct)
 {
@@ -284,9 +291,9 @@ function parse_chord_player() {
 
         // Get current duration
         var now_dur = get_duration_in_seconds(current_chord.get_dur());
-        
+
         // Figure out start position by selected chord
-        if (chord_selected !== -1 && k < chord_selected){
+        if (chord_selected !== -1 && k < chord_selected) {
             start_position += now_dur;
         }
 
@@ -1517,9 +1524,9 @@ comptoolsChordbuilder.prototype.add_chord_to_player = function () {
                         .funHighlightChordListElementNotes;
             }
 
-            if (comptools_config.chord_player !== undefined){
-                    comptools_config.chord_player.update_callback();
-                }    
+            if (comptools_config.chord_player !== undefined) {
+                comptools_config.chord_player.update_callback();
+            }
 
             play_chord(self.current_note, self.current_chord, 3, '3n');
         }
@@ -1558,7 +1565,7 @@ function comptoolsChordPlayerElement(root, chord, dur, oct)
 
     this.my_root = root;
     this.my_chord = chord;
-    
+
     // Timeline correspondence
     this.timeline_id = null;
 
@@ -1599,7 +1606,7 @@ function comptoolsChordPlayerElement(root, chord, dur, oct)
             .on('click', function () {
                 self.legato = !self.legato;
                 d3.select(this).classed('selected', self.legato);
-                if (comptools_config.chord_player !== undefined){
+                if (comptools_config.chord_player !== undefined) {
                     comptools_config.chord_player.update_callback();
                 }
             }
@@ -1613,7 +1620,7 @@ function comptoolsChordPlayerElement(root, chord, dur, oct)
     d3.select('#' + this.elem_id + ' .chord-length .chord-reduce-value')
             .on('click', function () {
                 self.updateDuration(-1);
-        if (comptools_config.chord_player !== undefined){
+                if (comptools_config.chord_player !== undefined) {
                     comptools_config.chord_player.update_callback();
                 }
             });
@@ -1621,7 +1628,7 @@ function comptoolsChordPlayerElement(root, chord, dur, oct)
     d3.select('#' + this.elem_id + ' .chord-length .chord-add-value')
             .on('click', function () {
                 self.updateDuration(1);
-        if (comptools_config.chord_player !== undefined){
+                if (comptools_config.chord_player !== undefined) {
                     comptools_config.chord_player.update_callback();
                 }
             });
@@ -1640,7 +1647,7 @@ function comptoolsChordPlayerElement(root, chord, dur, oct)
     d3.select('#' + this.elem_id + ' .chord-actions .chord-delete')
             .on('click', function () {
                 self.delete();
-                if (comptools_config.chord_player !== undefined){
+                if (comptools_config.chord_player !== undefined) {
                     comptools_config.chord_player.update_callback();
                 }
             });
@@ -1659,7 +1666,7 @@ function comptoolsChordPlayerElement(root, chord, dur, oct)
                             .instrument_glue
                             .funHighlightChordListElementNotes;
                 }
-                if (comptools_config.chord_player !== undefined){
+                if (comptools_config.chord_player !== undefined) {
                     comptools_config.chord_player.update_callback();
                 }
             });
@@ -1719,14 +1726,14 @@ comptoolsChordPlayerElement.prototype.clickHandler = function ()
         var action = !d3.select(the_elem).classed("chord-selected");
 
         // Remove all other selections
-        d3.selectAll('.' + CHORD_LIST_ITEM_CLASS 
+        d3.selectAll('.' + CHORD_LIST_ITEM_CLASS
                 + ' .uk-card').classed('chord-selected', false);
 
         // Assign selection
         d3.select(the_elem).classed("chord-selected", action);
-        
+
         // Update chord player timeline as well
-        if (comptools_config.chord_player !== undefined){
+        if (comptools_config.chord_player !== undefined) {
             comptools_config.chord_player
                     .update_timeline_selection(self, action);
         }
@@ -1792,7 +1799,6 @@ function comptoolsChordPlayer(player_class)
         if (!this.playing) {
             // Stop transport and cancel all events
             Tone.Transport.stop();
-            Tone.Transport.cancel(0);
             return true;
         }
 
@@ -1818,29 +1824,34 @@ function comptoolsChordPlayer(player_class)
 
         // If no chord is selected, start from the first one
         var start_chord = 0;
-        if (myev.selected_chord !== -1){
+        if (myev.selected_chord !== -1) {
             start_chord = myev.selected_chord;
         }
-        
+
+        // Clear all previous events
+        Tone.Transport.cancel(0);
+
         // Setup transport
         Tone.Transport.position = myev.start_position;
         Tone.Transport.loopStart = 0;
         Tone.Transport.loopEnd = myev.total_duration;
         Tone.Transport.loop = true;
-        
+
         // Schedule all play events
         var my_position = 0;
-        for(var k=0; k<chord_play_events.length; k++){
-            Tone.Transport.schedule(function(time){self.process_events()}, my_position);
+        for (var k = 0; k < chord_play_events.length; k++) {
+            Tone.Transport.schedule(function (time) {
+                self.process_events()
+            }, my_position);
             my_position += chord_play_events[k].duration;
         }
-        
+
         // Start processing the events
         this.current_event_index = start_chord;
 
         // Start transport
         Tone.Transport.start();
-        
+
     };
 
     this.process_events = function () {
@@ -1859,7 +1870,7 @@ function comptoolsChordPlayer(player_class)
         // Select this chord
         d3.select('#' + current_event.highlight_id + " div.uk-card")
                 .classed('chord-selected', true);
-        
+
         // Update timeline
         self.update_timeline_selection(current_event.object, true);
 
@@ -1897,24 +1908,28 @@ function comptoolsChordPlayer(player_class)
         d3.select("." + CHORD_PLAYER_CLASS
                 + " .chord-player-timeline").html("");
 
+        // Clear the measures
+        d3.select("." + CHORD_PLAYER_CLASS
+                + " .chord-player-timeline-measures").html("");
+
         // For every play event, get actual event width on the timeline,
         // add the element to DOM, and assign "selected" class, if the
         // corresponding chord is currently selected; skip all "legato"
-        
+
         var my_id;
-        
+
         for (var k = 0; k < my_events.length; k++) {
-            
+
             // Generate first id
-            if (k===0){
+            if (k === 0) {
                 my_id = "timeline-" + k;
             }
-            
+
             var my_obj = my_events[k].object;
-            
+
             // Merge legato chords
             if (!my_events[k].legato) {
-                
+
                 // Generate new id
                 my_id = "timeline-" + k;
                 var my_width = Math.floor((my_events[k].duration / total_dur)
@@ -1926,35 +1941,92 @@ function comptoolsChordPlayer(player_class)
                         .classed("timeline-element", true)
                         .style("width", my_width + "px");
             }
-            
+
             // If a chord is selected, highlight it in timeline as well
-            if (selected_chord !== -1){
+            if (selected_chord !== -1) {
                 this.update_timeline_selection(my_events[selected_chord].object, true);
             }
-            
+
             // Update timeline id
             my_obj.timeline_id = my_id;
         }
-    };
-    
-    this.update_timeline_selection = function(obj, action){
+
+        // TODO: Currently, there is no strict alignment between the chords
+        // and corresponding measures. As many chords are added, the difference
+        // will grow even more visible. However, the current architecture is
+        // limiting in this sense. A more general approach would fix this.
+
+        // Draw the measures
+        var mesw = d3.select("." + CHORD_PLAYER_CLASS
+                + " .chord-player-timeline-measures").style("width");
+        var mesh = d3.select("." + CHORD_PLAYER_CLASS
+                + " .chord-player-timeline-measures").style("height");
+
+        var my_svg = d3.select("." + CHORD_PLAYER_CLASS
+                + " .chord-player-timeline-measures")
+                .append("svg")
+                .attr("width", mesw)
+                .attr("height", mesh);
+
+        // Do the necessary computations: find beat duration
+        var beatd = get_duration_in_seconds("1/"
+                + parse_time_signature(comptools_config.time_signature)[1]);
+
+        // Bar is every N beats
+        var barn = parse_time_signature(comptools_config.time_signature)[0];
+
+        // Compute pixel per second for a single beat
+        var meswi = parseInt(mesw); var meshi = parseInt(mesh);
+        var pps = beatd* (meswi / total_dur);
+
+        // Draw Beat/bar lines along the timeline
+        var myx = 0, cbeat = 0;
+        while (myx <= meswi) {
+
+            // Beat or bar line?
+            var len = 4;
+            if (cbeat % barn === 0) {
+                // Bar
+                len = 8;
+            }
+
+            my_svg.append("line")
+                    .attr("x1", myx)
+                    .attr("x2", myx)
+                    .attr("y1", meshi)
+                    .attr("y2", meshi-len);
+
+            myx += pps;
+            cbeat += 1;
+        }
         
+        // Draw the base horizontal line
+        my_svg.append("line")
+                    .attr("x1", 0)
+                    .attr("x2", meswi)
+                    .attr("y1", meshi)
+                    .attr("y2", meshi);
+
+    };
+
+    this.update_timeline_selection = function (obj, action) {
+
         // Clear all previous selections
-        d3.selectAll("." + CHORD_PLAYER_CLASS + " .chord-player-timeline" 
+        d3.selectAll("." + CHORD_PLAYER_CLASS + " .chord-player-timeline"
                 + " .timeline-element")
                 .classed("selected", false);
-        
+
         // Highlight current chord in timeline
-        d3.select("." + CHORD_PLAYER_CLASS + " .chord-player-timeline" 
+        d3.select("." + CHORD_PLAYER_CLASS + " .chord-player-timeline"
                 + " #" + obj.timeline_id).classed("selected", action);
-        
+
     };
 }
 
 // Function to run every time a chord is added, updated, duplicated, or deleted
-comptoolsChordPlayer.prototype.update_callback = function (){
-    
+comptoolsChordPlayer.prototype.update_callback = function () {
+
     // TODO: Create and draw the chord timeline
     this.update_timeline();
-    
+
 }

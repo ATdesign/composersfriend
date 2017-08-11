@@ -352,12 +352,12 @@ div.fretboard-bass{
 }
 
 .chord-player .chord-player-timeline{
-    width: 720px;
+    width: 718px;
     height: 16px;
     margin: auto;
     padding: 0 1px 0 1px;
     display: block;
-    margin-bottom: 15px;
+    margin-bottom: 5px;
     background: #eee;
     .timeline-element{
         background: #fff;
@@ -368,5 +368,19 @@ div.fretboard-bass{
     }
     .timeline-element.selected{
         background: #d20050;
+    }
+}
+
+.chord-player .chord-player-timeline-measures{
+    width: 720px;
+    height: 8px;
+    margin: auto;
+    display: block;
+    margin-top: 0px;
+    margin-bottom: 20px;
+    
+    svg line{
+        stroke: #666;
+        stroke-width: 2px;
     }
 }
