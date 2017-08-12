@@ -160,7 +160,7 @@ function player_play_chord(notes, len) {
 
     if (comptools_midi_player !== undefined &&
             comptools_midi_player.ready && comptools_config.play_midi) {
-        comptools_midi_player.sendOnOffMessage(notes, 1000 * len);
+        comptools_midi_player.CyclicSendOnMessage(notes);
     }
 }
 ;
@@ -319,7 +319,7 @@ function parse_chord_player() {
             "highlight_notes": get_chord(current_chord.my_root,
                     current_chord.my_chord),
             "duration": now_dur,
-            "interval": get_duration_in_ms(current_chord.get_dur()),
+            "interval": now_dur,
             "legato": do_legato
         };
 
@@ -1812,6 +1812,13 @@ function comptoolsChordPlayer(player_class)
         if (!this.playing) {
             // Stop transport and cancel all events
             Tone.Transport.stop();
+            
+            // Stop MIDI, if present
+            if (comptools_midi_player !== undefined &&
+                    comptools_midi_player.ready){
+                comptools_midi_player.flushNoteBuffer();
+            }
+            
             return true;
         }
 
@@ -1854,9 +1861,9 @@ function comptoolsChordPlayer(player_class)
         var my_position = 0;
         for (var k = 0; k < chord_play_events.length; k++) {
             Tone.Transport.schedule(function (time) {
-                self.process_events()
+                self.process_events();
             }, my_position);
-            my_position += chord_play_events[k].duration;
+            my_position += chord_play_events[k].interval;
         }
 
         // Start processing the events
@@ -2157,8 +2164,66 @@ comptoolsMIDIPlayer = function () {
 
 
     };
+    
+    this.note_buffer = [];  // Stores on notes to flush on next send
+    
+    this.flushNoteBuffer = function(){
+        this.sendOffMessage(this.note_buffer); // Stop playing notes
+        this.note_buffer = []; // Remove all notes from buffer
+    }
+    
+    this.sendOffMessage = function(notes, velocity){
+        
+        if (!this.ready) {
+            return false;
+        }
+        
+        var myvel = 0x64;
+        if (velocity !== undefined) {
+            myvel = velocity;
+        }
+        
+        var noteOffArray = [];
+        for (var k = 0; k < notes.length; k++) {
+            var n = get_semitone_distance(notes[k]) + 11;
+            noteOffArray.push(0x80, n, myvel);
+        }
+        
+        var output = this.midi.outputs.get(this.MIDI_current_output);
+        output.send(noteOffArray);
+        
+    }
+    
+    // Special function that first sends buffered off messages
+    this.CyclicSendOnMessage = function(notes, velocity){
+        
+        if (!this.ready) {
+            return false;
+        }
+        
+        var myvel = 0x64;
+        if (velocity !== undefined) {
+            myvel = velocity;
+        }
+        
+        // Send buffered off messages
+        this.flushNoteBuffer();
+        
+        var noteOnArray = [];
+        for (var k = 0; k < notes.length; k++) {
+            var n = get_semitone_distance(notes[k]) + 11;
+            noteOnArray.push(0x90, n, myvel);
+        }
+        
+        var output = this.midi.outputs.get(this.MIDI_current_output);
+        output.send(noteOnArray);
+        
+        // Assign future off messages
+        this.note_buffer = notes;
+        
+    }
 
-    // This is the main function - it sends the notes to the port
+    // Sends the notes to the port with specified duration (no sync)
     this.sendOnOffMessage = function (notes, duration_in_ms, velocity) {
 
         // Check if we are ready
@@ -2186,15 +2251,9 @@ comptoolsMIDIPlayer = function () {
         var output = this.midi.outputs.get(this.MIDI_current_output);
 
         // Send noteon and then noteoff with a delay
-        // TODO: This is an imprecise solution, so for now we artificially
-        // decrease the duration by a preset number of milliseconds.
-        
-        TEMP_OFFSET = 100;
-        
-        // Proper solution: schedule note on/note off messages in transport.
         output.send(noteOnArray);
         output.send(noteOffArray, 
-                window.performance.now() + duration_in_ms - TEMP_OFFSET );
+                window.performance.now() + duration_in_ms);
 
         return true;
 
