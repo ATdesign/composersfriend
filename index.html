@@ -54,7 +54,7 @@
                     <h3 class="uk-accordion-title">Chord Player</h3>
                     <div class="uk-accordion-content">
                         <div class="chord-player">
-                  
+
                         </div>
                     </div>
                 </li>
@@ -76,17 +76,41 @@
                         <div class="fretboard-bass fb-bass"></div>
                     </div>
                 </li>
+                <li>
+                    <h3 class="uk-accordion-title">Options</h3>
+                    <div class="uk-accordion-content">
+                        <div class="comptools-options">
+                            <form>
+                                <fieldset class="uk-fieldset">
+
+                                    <div class="uk-margin uk-grid-small uk-child-width-auto uk-grid">
+                                        <label><input class="uk-checkbox option-use-sound" type="checkbox" checked> Play sound</label>
+                                    </div>
+                                    
+                                    <div class="uk-margin uk-grid-small uk-child-width-auto uk-grid">
+                                        <label><input class="uk-checkbox option-use-midi" type="checkbox"> Use MIDI output</label>
+                                    </div>
+
+                                    <div class="uk-margin">
+                                        <select class="uk-select option-midi-output"></select>
+                                    </div>
+
+                                </fieldset>
+                            </form>
+                        </div>
+                    </div>
+                </li>
             </ul>
 
         </div>
 
         <!-- Add Tone.js -->
         <script src="js/Tone.min.js"></script>
-        
+
         <script type="text/javascript">
             var comptools_sound_player = new Tone.PolySynth(8, Tone.Synth).toMaster();
         </script>
-        
+
         <!-- THE test script -->
         <script src="js/composer-tools.js"></script>
 
@@ -99,7 +123,7 @@
             st_keyboard = new comptoolsKeyboard(".keyboard", "C1-C5");
 
             fb_guitar = new comptoolsFretboard(".fb-guitar", "E4B3G3D3A2E2");
-            
+
             my_chplayer = new comptoolsChordPlayer('.chord-player');
 
             // Options for the bass
@@ -124,18 +148,25 @@
 
             the_glue.chord_builder = my_chbuild;
             my_chbuild.selection_callback = the_glue.funHighlightChordNotes;
-            
+
             // For the chord player, we must set the instrument glue config
             // variable so that all elements know how to access the necessary function
             comptools_config.instrument_glue = the_glue;
             comptools_config.chord_player = my_chplayer;
 
-            // Finally, we need to assign a handler to the sortable component
+            // We need to assign a handler to the sortable component
             // since when the order is changed, the timeline must be redrawn
             // in chord player.
             $('#chord-list').on('change', function () {
                 my_chplayer.update_callback();
             });
+            
+            // Options
+            my_options = new comptoolsOptions();
+            
+            // Experimental MIDI player feature
+            comptools_midi_player = new comptoolsMIDIPlayer();
+            comptools_midi_player.initialize();
 
         </script>
 

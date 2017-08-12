@@ -83,6 +83,7 @@ var comptools_config = {
     "tempo": 120,
     "time_signature": "4/4",
     "play_sound": true,
+    "play_midi": false,
     "instrument_glue": null, // Reference to instrument glue.
     "chord_player": null // Reference to chord player.
 };
@@ -133,11 +134,18 @@ function get_duration_in_ms(dur) {
 // Audio context sound player
 function play_chord(note, chord, oct, len) {
     // Check if there is audio context and that sound is enabled
+    var my_notes = get_chord_notes(note, chord, oct);
     if (comptools_sound_player !== undefined && comptools_config.play_sound)
     {
-        comptools_sound_player.triggerAttackRelease(
-                get_chord_notes(note, chord, oct), len);
+        comptools_sound_player.triggerAttackRelease(my_notes, len);
     }
+
+    // If there is MIDI support and MIDI is enabled, then play midi
+    if (comptools_midi_player !== undefined &&
+            comptools_midi_player.ready && comptools_config.play_midi) {
+        comptools_midi_player.sendOnOffMessage(my_notes, 1000 * len);
+    }
+
 }
 ;
 
@@ -148,6 +156,11 @@ function player_play_chord(notes, len) {
     if (comptools_sound_player !== undefined && comptools_config.play_sound)
     {
         comptools_sound_player.triggerAttackRelease(notes, len);
+    }
+
+    if (comptools_midi_player !== undefined &&
+            comptools_midi_player.ready && comptools_config.play_midi) {
+        comptools_midi_player.sendOnOffMessage(notes, 1000 * len);
     }
 }
 ;
@@ -1528,7 +1541,7 @@ comptoolsChordbuilder.prototype.add_chord_to_player = function () {
                 comptools_config.chord_player.update_callback();
             }
 
-            play_chord(self.current_note, self.current_chord, 3, '3n');
+            play_chord(self.current_note, self.current_chord, 3, 0.5);
         }
 
 
@@ -1976,8 +1989,9 @@ function comptoolsChordPlayer(player_class)
         var barn = parse_time_signature(comptools_config.time_signature)[0];
 
         // Compute pixel per second for a single beat
-        var meswi = parseInt(mesw); var meshi = parseInt(mesh);
-        var pps = beatd* (meswi / total_dur);
+        var meswi = parseInt(mesw);
+        var meshi = parseInt(mesh);
+        var pps = beatd * (meswi / total_dur);
 
         // Draw Beat/bar lines along the timeline
         var myx = 0, cbeat = 0;
@@ -1994,18 +2008,18 @@ function comptoolsChordPlayer(player_class)
                     .attr("x1", myx)
                     .attr("x2", myx)
                     .attr("y1", meshi)
-                    .attr("y2", meshi-len);
+                    .attr("y2", meshi - len);
 
             myx += pps;
             cbeat += 1;
         }
-        
+
         // Draw the base horizontal line
         my_svg.append("line")
-                    .attr("x1", 0)
-                    .attr("x2", meswi)
-                    .attr("y1", meshi)
-                    .attr("y2", meshi);
+                .attr("x1", 0)
+                .attr("x2", meswi)
+                .attr("y1", meshi)
+                .attr("y2", meshi);
 
     };
 
@@ -2028,5 +2042,155 @@ comptoolsChordPlayer.prototype.update_callback = function () {
 
     // TODO: Create and draw the chord timeline
     this.update_timeline();
+
+}
+
+// Options setting etc
+comptoolsOptions = function () {
+
+    // Sound on/off
+    d3.select('.option-use-sound').on("change", function () {
+        comptools_config.play_sound = d3.select(this).property('checked');
+    });
+
+};
+
+// Experimental but highly sought after feature
+// ***************
+// * MIDI PLAYER *
+// ***************
+
+comptoolsMIDIPlayer = function () {
+
+    var self = this;
+
+    // Properties
+    this.MIDI_outputs = [];
+    this.MIDI_current_output = null;
+    this.midi = null;
+    this.ready = false;
+
+    // Check if support is present in the browser
+    this.support = function () {
+        if (navigator.requestMIDIAccess === undefined) {
+            return false;
+        } else {
+            return true;
+        }
+    };
+
+    this.initialize = function () {
+
+        // Check if there is support, if not - return
+        if (!this.support()) {
+            return null;
+        }
+
+        // Otherwise proceed with initialization
+        navigator.requestMIDIAccess().then(function (midiAccess) {
+            // Set up access object
+            self.midi = midiAccess;
+            console.log('MIDI access is obtained.');
+
+            // Enumerate all MIDI outputs
+            // TODO: potential bug. This may not work everywhere.
+            self.MIDI_outputs = [];
+            self.midi.outputs.forEach(function (key, port) {
+                self.MIDI_outputs.push({"name": key.name, "id": port});
+            });
+
+            // Are there any available outputs?
+            if (self.MIDI_outputs.length > 0) {
+                self.MIDI_current_output =
+                        self.MIDI_outputs[0].id; // Default output
+                self.ready = true;
+
+                // Populate the controls (if present)
+                self
+                        .populateOptionsForm('option-use-midi',
+                                'option-midi-output');
+
+            } else
+            {
+                self.MIDI_current_output = null;
+                self.ready = false;
+                console.log('There are no available MIDI outputs.');
+            }
+
+            return self;
+        },
+                function () {
+                    console.log('Failed to get access to MIDI devices.')
+                });
+
+    };
+
+    // This is used to create the GUI element which has the output list
+    this.populateOptionsForm = function (chk_class, sel_class) {
+
+        // Use d3.js to add options to a select field
+
+        // Remove all previous entries
+        var my_sel = d3.select('select.' + sel_class);
+        my_sel.html();
+
+        // Go through available outputs (if any) and populate the select
+        for (var k = 0; k < this.MIDI_outputs.length; k++) {
+            my_sel.append('option')
+                    .attr('value', this.MIDI_outputs[k].id)
+                    .text(this.MIDI_outputs[k].name);
+        }
+
+        // Create the callbacks
+        my_sel.on('change', function (d) {
+            self.MIDI_current_output = d3.select(this).property("value");
+        });
+
+        var my_chk = d3.select('input.' + chk_class);
+        my_chk.on('change', function (d) {
+
+            // This changes the general option and
+            // does not modify the MIDI player object
+            comptools_config.play_midi = d3.select(this).property('checked');
+
+        });
+
+
+    };
+
+    // This is the main function - it sends the notes to the port
+    this.sendOnOffMessage = function (notes, duration_in_ms, velocity) {
+
+        // Check if we are ready
+        if (!this.ready) {
+            return false;
+        }
+
+        var myvel = 0x64;
+        if (velocity !== undefined) {
+            myvel = velocity;
+        }
+
+        // Generate note on and note off messages for the notes
+        // Note that the formula for getting the note "byte" is
+        // simply get_semitone_distance(note) + 11
+        var noteOnArray = [];
+        var noteOffArray = [];
+        for (var k = 0; k < notes.length; k++) {
+            var n = get_semitone_distance(notes[k]) + 11;
+            noteOnArray.push(0x90, n, myvel);
+            noteOffArray.push(0x80, n, myvel);
+        }
+
+        // Get the correct output
+        var output = this.midi.outputs.get(this.MIDI_current_output);
+
+        // Send noteon and then noteoff with a delay
+        output.send(noteOnArray);
+        output.send(noteOffArray, window.performance.now() + duration_in_ms);
+
+        return true;
+
+    };
 
 }
