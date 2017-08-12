@@ -2186,8 +2186,15 @@ comptoolsMIDIPlayer = function () {
         var output = this.midi.outputs.get(this.MIDI_current_output);
 
         // Send noteon and then noteoff with a delay
+        // TODO: This is an imprecise solution, so for now we artificially
+        // decrease the duration by a preset number of milliseconds.
+        
+        TEMP_OFFSET = 100;
+        
+        // Proper solution: schedule note on/note off messages in transport.
         output.send(noteOnArray);
-        output.send(noteOffArray, window.performance.now() + duration_in_ms);
+        output.send(noteOffArray, 
+                window.performance.now() + duration_in_ms - TEMP_OFFSET );
 
         return true;
 
