@@ -11,9 +11,6 @@
         <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
         <title>Composer's friend</title>
 
-        <!-- Bootstrap -->
-        <!-- <link href="css/bootstrap.min.css" rel="stylesheet"> -->
-
         <!-- The document -->
         <link href="css/style.css" rel="stylesheet">
 
@@ -30,28 +27,35 @@
     </head>
     <body>
 
-        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <!-- jQuery -->
         <script src="js/jquery-3.1.1.min.js"></script>
 
         <!-- Include all compiled plugins (below), or include individual files as needed -->
-        <!-- <script src="js/bootstrap.min.js"></script> -->
         <link rel="stylesheet" href="css/uikit.css" />
         <script src="js/uikit.js"></script>
 
         <!-- Create div containers -->
         <div class="all-container">
-            <h2 style="font-family: 'Fira Sans'">Composer's friend</h2>
-            <ul uk-accordion="multiple: true">
+            <h2 style="font-family: 'Fira Sans'">Composer's Friend</h2>
+            <ul uk-accordion="multiple: true; collapsible: false">
                 <li class="uk-open">
-                    <h3 class="uk-accordion-title">Circle of fifths</h3>
+                    <h3 class="uk-accordion-title">Circle of Fifths</h3>
                     <div class="uk-accordion-content">
                         <div class="theory" id="theory-container"></div>
                     </div>
                 </li>
                 <li class="uk-open">
-                    <h3 class="uk-accordion-title">Chord builder</h3>
+                    <h3 class="uk-accordion-title">Chord Builder</h3>
                     <div class="uk-accordion-content">
                         <div class="chord-builder"></div>
+                    </div>
+                </li>
+                <li class="uk-open">
+                    <h3 class="uk-accordion-title">Chord Player</h3>
+                    <div class="uk-accordion-content">
+                        <div class="chord-player">
+
+                        </div>
                     </div>
                 </li>
                 <li class="uk-open">
@@ -72,9 +76,40 @@
                         <div class="fretboard-bass fb-bass"></div>
                     </div>
                 </li>
+                <li>
+                    <h3 class="uk-accordion-title">Options</h3>
+                    <div class="uk-accordion-content">
+                        <div class="comptools-options">
+                            <form>
+                                <fieldset class="uk-fieldset">
+
+                                    <div class="uk-margin uk-grid-small uk-child-width-auto uk-grid">
+                                        <label><input class="uk-checkbox option-use-sound" type="checkbox" checked> Play sound</label>
+                                    </div>
+                                    
+                                    <div class="uk-margin uk-grid-small uk-child-width-auto uk-grid">
+                                        <label><input class="uk-checkbox option-use-midi" type="checkbox"> Use MIDI output</label>
+                                    </div>
+
+                                    <div class="uk-margin">
+                                        <select class="uk-select option-midi-output"></select>
+                                    </div>
+
+                                </fieldset>
+                            </form>
+                        </div>
+                    </div>
+                </li>
             </ul>
 
         </div>
+
+        <!-- Add Tone.js -->
+        <script src="js/Tone.min.js"></script>
+
+        <script type="text/javascript">
+            var comptools_sound_player = new Tone.PolySynth(8, Tone.Synth).toMaster();
+        </script>
 
         <!-- THE test script -->
         <script src="js/composer-tools.js"></script>
@@ -82,12 +117,14 @@
         <!-- Create a couple of fretboards ... -->
         <script type="text/javascript">
             my_theory = new comptoolsTheory("theory-container");
-            
+
             my_chbuild = new comptoolsChordbuilder(".chord-builder");
 
             st_keyboard = new comptoolsKeyboard(".keyboard", "C1-C5");
 
             fb_guitar = new comptoolsFretboard(".fb-guitar", "E4B3G3D3A2E2");
+
+            my_chplayer = new comptoolsChordPlayer('.chord-player');
 
             // Options for the bass
             bass_options = {"firstFretWidth": 70,
@@ -101,16 +138,35 @@
             the_glue.objArray.push(st_keyboard);
             the_glue.objArray.push(fb_guitar);
             the_glue.objArray.push(fb_bass);
-            
+
             st_keyboard.selection_callback = the_glue.funCallback;
             fb_guitar.selection_callback = the_glue.funCallback;
             fb_bass.selection_callback = the_glue.funCallback;
 
             the_glue.theory = my_theory;
             my_theory.selection_callback = the_glue.funHighlightNotes;
-            
+
             the_glue.chord_builder = my_chbuild;
             my_chbuild.selection_callback = the_glue.funHighlightChordNotes;
+
+            // For the chord player, we must set the instrument glue config
+            // variable so that all elements know how to access the necessary function
+            comptools_config.instrument_glue = the_glue;
+            comptools_config.chord_player = my_chplayer;
+
+            // We need to assign a handler to the sortable component
+            // since when the order is changed, the timeline must be redrawn
+            // in chord player.
+            $('#chord-list').on('change', function () {
+                my_chplayer.update_callback();
+            });
+            
+            // Options
+            my_options = new comptoolsOptions();
+            
+            // Experimental MIDI player feature
+            comptools_midi_player = new comptoolsMIDIPlayer();
+            comptools_midi_player.initialize();
 
         </script>
 

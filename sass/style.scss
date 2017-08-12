@@ -43,8 +43,14 @@ div.chord-builder{
     margin: auto;
     /*margin-top: 25px;
     margin-bottom: 25px;*/
-    width: 720px;
+    width: 800px;
     height: 200px;
+}
+
+div.chord-player{
+    display: block;
+    margin: auto;
+    width: 720px;
 }
 
 #scale-pentatonic{
@@ -191,7 +197,7 @@ div.fretboard-bass{
 
 .chordbuild-add circle{
     fill: #fff;
-    stroke: #000;
+    stroke: #999;
     stroke-width: 3px;
 }
 
@@ -252,4 +258,129 @@ div.fretboard-bass{
 
 .fret-wound-string{
     stroke-dasharray: 1,1;
+}
+
+/* Chord list */
+.chord-list-element,
+.chord-list-element.uk-sortable-item,
+.chord-list-element.uk-sortable-placeholder{
+    span.chord-text{
+        font-size: 0.8em;
+    }
+    
+    span.btn-delete{
+        color: red;
+    }
+
+    .uk-card-body {
+        padding: 5px 5px;
+    }
+}
+
+.chord-list-element div.uk-card{
+    border: 1px solid #fafafa;
+}
+
+.chord-list-element div.uk-card.chord-selected{
+    border: 1px solid #d20050;
+}
+
+/* Override rule ...*/
+#chord-list.uk-child-width-1-3 > *{
+    width: 25% !important;
+}
+
+
+.chord-header{
+    text-align: left;
+    margin-bottom: 1em;
+    .chord-text{
+        cursor: pointer;
+    }
+}
+
+.chord-option{
+    width: 100%;
+    font-size: 0.8em;
+    line-height: 250%;
+    .chord-option-label{
+        width: 50px;
+        display: inline-block;
+    }
+    .chord-text-input{
+        width: 40px;
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+    .chord-controls{
+        cursor: pointer;
+    }
+    
+    .chord-delete{
+        color: red;
+    }
+}
+
+.chord-legato{
+    font-size: 0.8em;
+    border: 1px solid #fff;
+    cursor: pointer;
+    padding: 3px;
+}
+
+.chord-legato.selected{
+    border: 1px solid #666;
+}
+
+.chord-player .chord-player-controls{
+    width: 100%;
+    text-align: center;
+    height: 40px;
+    margin-bottom: 5px;
+    .chord-play{
+        border: 1px solid #fff;
+        margin: 5px;
+        padding: 5px;
+        cursor: pointer;
+    }
+    .chord-play.selected{
+        border: 1px solid #d20050;
+    }
+    .chord-bpm{
+        width: 50px;
+    }
+}
+
+.chord-player .chord-player-timeline{
+    width: 718px;
+    height: 16px;
+    margin: auto;
+    padding: 0 1px 0 1px;
+    display: block;
+    margin-bottom: 5px;
+    background: #eee;
+    .timeline-element{
+        background: #fff;
+        border: 1px solid #000;
+        margin: 1px 0 0 1px;
+        height: 11px;
+        float: left;
+    }
+    .timeline-element.selected{
+        background: #d20050;
+    }
+}
+
+.chord-player .chord-player-timeline-measures{
+    width: 720px;
+    height: 8px;
+    margin: auto;
+    display: block;
+    margin-top: 0px;
+    margin-bottom: 20px;
+    
+    svg line{
+        stroke: #666;
+        stroke-width: 2px;
+    }
 }
