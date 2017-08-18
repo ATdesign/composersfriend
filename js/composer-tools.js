@@ -84,8 +84,9 @@ var comptools_config = {
     "time_signature": "4/4",
     "play_sound": true,
     "play_midi": false,
-    "instrument_glue": null, // Reference to instrument glue.
-    "chord_player": null // Reference to chord player.
+    "instrument_glue": null, // Reference to instrument glue
+    "chord_player": null, // Reference to chord player
+    "chord_builder": null // Reference to chord builder
 };
 
 // Helper functions
