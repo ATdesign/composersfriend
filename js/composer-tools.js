@@ -1396,7 +1396,8 @@ function comptoolsChordbuilder(cont_class) {
         the_y = half_h - th_h * Math.sin(ang + dang * k);
 
         now_g = this.svg_chordbuild.append("g")
-                .attr("class", CHBUILD_DEFAULT_MARKER_CLASS)
+                .attr("class", CHBUILD_DEFAULT_MARKER_CLASS + " "
+                      + "chb-n-" + note_array[k].replace("#","s").toLowerCase())
                 .attr("id", "cbnote-" + k)
                 .on("click", this.update_note());
 
@@ -1441,7 +1442,8 @@ function comptoolsChordbuilder(cont_class) {
     for (var k = 0; k < chord_str.length; k++) {
 
         now_g = this.svg_chordbuild.append("g")
-                .attr("class", CHBUILD_DEFAULT_CHORD_CLASS)
+                .attr("class", CHBUILD_DEFAULT_CHORD_CLASS + " "
+                     + "chb-c-" + chord_str[k])
                 .attr("id", "cbchord-" + k)
                 .on("click", this.update_chord());
 
@@ -1486,10 +1488,14 @@ comptoolsChordbuilder.prototype.update_note = function () {
             self.current_note = this_note;
         }
 
+        // Edit the chord if needed
+        self.edit_chord_in_player();
+
         self.selection_callback();
 
     };
 };
+
 
 comptoolsChordbuilder.prototype.update_chord = function () {
     var self = this;
@@ -1513,9 +1519,50 @@ comptoolsChordbuilder.prototype.update_chord = function () {
             self.current_chord = this_chord;
         }
 
+        self.edit_chord_in_player();
         self.selection_callback();
     };
 };
+
+
+// This is used to edit the current chord in the player if it exists
+comptoolsChordbuilder.prototype.edit_chord_in_player = function () {
+    if (comptools_config.chord_player !== undefined &&
+            comptools_config.chord_player.current_chord !== null &&
+            this.current_note !== "none" &&
+            this.current_chord !== "none"){
+        comptools_config.chord_player.current_chord.updateChord(
+                this.current_note, this.current_chord);
+    }
+};
+
+// Note that his function DOES NOT update the fretboards and keyboards
+// What it does is it only highlights the desired note and chord in the selector
+comptoolsChordbuilder.prototype.set_note_chord = function (note, chord) {
+    
+    // Set current note and chord. We assume they are legal!
+    this.current_note = note;
+    this.current_chord = chord;
+    
+    // Get class names
+    var note_cl = "chb-n-" + note.replace("#", "s").toLowerCase();
+    var chord_cl = "chb-c-" + chord;
+    
+    // Remove all previous highlights
+    this.svg_chordbuild.selectAll("." + CHBUILD_DEFAULT_MARKER_CLASS)
+                    .classed(CHBUILD_SELECTED_MARKER, false);
+    this.svg_chordbuild.selectAll("." + CHBUILD_DEFAULT_CHORD_CLASS)
+                    .classed(CHBUILD_SELECTED_MARKER, false);
+            
+    // Find and highlight the correct markers
+    this.svg_chordbuild.select("." + note_cl)
+                    .classed(CHBUILD_SELECTED_MARKER, true);
+    this.svg_chordbuild.select("." + chord_cl)
+                    .classed(CHBUILD_SELECTED_MARKER, true);
+    
+            
+};
+
 
 comptoolsChordbuilder.prototype.add_chord_to_player = function () {
     var self = this;
@@ -1595,6 +1642,12 @@ function comptoolsChordPlayerElement(root, chord, dur, oct)
     this.get_oct = function () {
         return CHORD_OCTAVES[this.octave_index];
     };
+    
+    // Play this chord
+    this.play = function () {
+        play_chord(this.my_root, this.my_chord, this.get_oct(),
+                    get_duration_in_seconds(this.get_dur()));
+    }
 
     // Whether to use legato with several same chords
     this.legato = false;
@@ -1686,6 +1739,22 @@ function comptoolsChordPlayerElement(root, chord, dur, oct)
             });
 
 
+    // Update chord
+    this.updateChord = function(note, chord){
+        
+        // Replace note and chord assuming they are correct
+        this.my_root = note;
+        this.my_chord = chord;
+        
+        // Update text
+        d3.select("#" + this.elem_id + " span.chord-text")
+                .html(note + " " + chord);
+        
+        // Play the chord
+        this.play();
+        
+    };
+
     // Update duration
     this.updateDuration = function (dir)
     {
@@ -1721,6 +1790,12 @@ function comptoolsChordPlayerElement(root, chord, dur, oct)
     // Delete method
     this.delete = function ()
     {
+        // Check if this object is the selected one in player and remove it
+        if (comptools_config.chord_player !== undefined &&
+                this === comptools_config.chord_player.current_chord){
+            comptools_config.chord_player.current_chord = null
+        }
+        
         this.list_elem.remove();
         chord_list.remove_obj_by_prop('elem_id', this.elem_id);
         return true;
@@ -1745,8 +1820,21 @@ comptoolsChordPlayerElement.prototype.clickHandler = function ()
 
         // Assign selection
         d3.select(the_elem).classed("chord-selected", action);
+        
+        // Update the player with currently selected chord information
+        if (comptools_config.chord_player !== undefined && action) {
+            comptools_config.chord_player.current_chord = self;
+        }else{
+            comptools_config.chord_player.current_chord = null;
+        }
 
-        // Update chord player timeline as well
+        // Assign selection in chord builder as well
+        if (comptools_config.chord_builder !== undefined && action){
+            comptools_config.chord_builder
+                    .set_note_chord(self.my_root, self.my_chord);
+        }
+
+        // Update chord player timeline too
         if (comptools_config.chord_player !== undefined) {
             comptools_config.chord_player
                     .update_timeline_selection(self, action);
@@ -1778,7 +1866,7 @@ function comptoolsChordPlayer(player_class)
 
     this.playing = false;           // Player state
     this.current_event_index = 0;   // Event index for the scheduler
-    this.update_timer;              // Needed to schedule chord changes
+    this.current_chord = null;      // Currently selected chord element
 
     // Get tempo from config file if there is one
     var my_tempo = 120; // Defaults to 120 bpm
@@ -1891,6 +1979,20 @@ function comptoolsChordPlayer(player_class)
         // Select this chord
         d3.select('#' + current_event.highlight_id + " div.uk-card")
                 .classed('chord-selected', true);
+        
+        // Assign selection in chord builder as well
+        if (comptools_config.chord_builder !== undefined){
+            comptools_config.chord_builder
+                    .set_note_chord(current_event.object.my_root,
+                                    current_event.object.my_chord);
+        }
+        
+        // Update the player with currently selected chord information
+        if (comptools_config.chord_player !== undefined) {
+            this.current_chord = current_event.object;
+        }else{
+            this.current_chord = null;
+        }
 
         // Update timeline
         self.update_timeline_selection(current_event.object, true);
