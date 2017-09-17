@@ -216,7 +216,7 @@ function parse_time_signature(ts) {
 // Function to return chord notes
 function get_chord_notes(note, chord, oct)
 {
-    // Start from 4th "octave" by default
+    // Start from 3rd "octave" by default
     if (oct === undefined)
     {
         oct = 3;
