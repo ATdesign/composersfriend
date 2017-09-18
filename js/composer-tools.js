@@ -596,14 +596,14 @@ function comptoolsTheory(cont_id) {
     this.scale_data = 'none';
 
     // Get the correct SVG file and add it to the specified container
-    my_theory_svg = SVG_DIRECTORY + "note-relationships.svg";
+    var my_theory_svg = SVG_DIRECTORY + "note-relationships.svg";
 
     // Load the XML and place it into the specified container
     d3.xml(my_theory_svg, function (xml) {
         document.getElementById(cont_id).appendChild(xml.documentElement);
 
         // The id
-        elid = "#" + cont_id;
+        var elid = "#" + cont_id;
 
         self.svg_theory = d3.select(elid).select("svg");
 
@@ -834,6 +834,85 @@ comptoolsTheory.prototype.clickHandler = function ()
 comptoolsTheory.prototype.selection_callback = function () {
     return null;
 };
+
+// Chord progressions
+function comptoolsChordProgressions(cont_class, root, scale){
+    
+    // Draw immediately
+    var draw_now = false;
+    
+    // Check input arguments
+    if (root === undefined || scale === undefined){
+        root = 'none';
+        scale = 'none';
+    }else{
+        // Otherwise we'd need to draw this immediately, 
+        // and we do this after everything is initialized
+        draw_now = true;
+    }
+    
+    var self = this;
+
+    // Current root
+    this.root = root;
+
+    // Current scale
+    this.scale = scale;
+    
+    // Major and minor progression container element references
+    this.maj_prog = null;
+    this.min_prog = null;
+
+    // Get the correct SVG file and add it to the specified container
+    var major_progressions = SVG_DIRECTORY + "major_chord_progressions.svg";
+    var minor_progressions = SVG_DIRECTORY + "minor_chord_progressions.svg";
+    
+    // Add the chord progression div containers
+    d3.select(cont_class).append('div').attr('id', 'id-major-progressions');
+    d3.select(cont_class).append('div')
+            .attr('id', 'id-minor-progressions')
+            .style('display', 'none'); // Hide by default
+
+    // Load the XML and place it into the specified container
+    d3.xml(major_progressions, function (xml) {
+        document.getElementById('id-major-progressions')
+                .appendChild(xml.documentElement);
+
+        // The id
+        var elid = "#id-major-progressions";
+        self.maj_prog = d3.select(elid).select("svg");
+
+        // Fill the whole container element; we assume SVG has no margins
+        var the_conw = parseFloat(d3.select(elid).style("width"));
+        var the_conh = parseFloat(d3.select(elid).style("height"));
+
+        // Set the width/height
+        self.maj_prog.attr("width", the_conw);
+        self.maj_prog.attr("height", the_conh);
+
+    });
+    
+    // Do the same for minor progressions
+    d3.xml(minor_progressions, function (xml) {
+        document.getElementById('id-minor-progressions').appendChild(xml.documentElement);
+
+        // The id
+        var elid = "#id-minor-progressions";
+        self.min_prog = d3.select(elid).select("svg");
+
+        // Fill the whole container element; we assume SVG has no margins
+        var the_conw = parseFloat(d3.select(elid).style("width"));
+        var the_conh = parseFloat(d3.select(elid).style("height"));
+
+        // Set the width/height
+        self.min_prog.attr("width", the_conw);
+        self.min_prog.attr("height", the_conh);
+
+    });
+}
+
+
+
 
 // The piano keyboard
 function comptoolsKeyboard(cont_class, range, options) {

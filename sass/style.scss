@@ -38,6 +38,24 @@ div.theory{
     height: 400px;
 }
 
+div.chord-progressions{
+    width: 100%;
+}
+
+div#id-major-progressions{
+    display: block;
+    margin: auto;
+    width: 600px;
+    height: 300px;
+}
+
+div#id-minor-progressions{
+    display: block;
+    margin: auto;
+    width: 750px;
+    height: 300px;
+}
+
 div.chord-builder{
     display: block;
     margin: auto;

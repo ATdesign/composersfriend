@@ -39,9 +39,15 @@
             <h2 style="font-family: 'Fira Sans'">Composer's Friend</h2>
             <ul uk-accordion="multiple: true; collapsible: false">
                 <li class="uk-open">
-                    <h3 class="uk-accordion-title">Circle of Fifths</h3>
+                    <h3 class="uk-accordion-title"> Circle of Fifths</h3>
                     <div class="uk-accordion-content">
                         <div class="theory" id="theory-container"></div>
+                    </div>
+                </li>
+                <li class="uk-open">
+                    <h3 class="uk-accordion-title">Chord Progressions</h3>
+                    <div class="uk-accordion-content">
+                        <div class="chord-progressions"></div>
                     </div>
                 </li>
                 <li class="uk-open">
@@ -117,6 +123,8 @@
         <!-- Create a couple of fretboards ... -->
         <script type="text/javascript">
             my_theory = new comptoolsTheory("theory-container");
+            
+            my_progbuild = new comptoolsChordProgressions('.chord-progressions');
 
             my_chbuild = new comptoolsChordbuilder(".chord-builder");
 
