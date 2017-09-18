@@ -19,11 +19,34 @@ var KEYB_DEFAULT_WHITE_KEY_CLASS = 'keyboard-white-key-default';
 var KEYB_DEFAULT_BLACK_KEY_CLASS = 'keyboard-black-key-default';
 var KEYB_DEFAULT_MARKER_CLASS = 'keyboard-marker-default';
 
+
+// Chord builder
 var CHBUILD_GRID_Y = 5; // Number of elements in vertical section
 var CHBUILD_DEFAULT_MARKER_CLASS = 'chordbuild-marker';
 var CHBUILD_DEFAULT_CHORD_CLASS = 'chordbuild-chord';
 var CHBUILD_SELECTED_MARKER = 'chordbuild-marker-selected';
 var CHBUILD_DEFAULT_ADD_CLASS = 'chordbuild-add';
+
+// Chord progressions
+var PROGBUILD_MAJOR_SVG_RELATIONS = {
+  "g-majprog-i": "maj",
+  "g-majprog-ii": "min",
+  "g-majprog-iii": "min",
+  "g-majprog-iv": "maj",
+  "g-majprog-v": "maj",
+  "g-majprog-vi": "min",
+  "g-majprog-viidim": "dim"
+};
+
+var PROGBUILD_MINOR_SVG_RELATIONS = {
+  "g-minprog-i": "min",
+  "g-minprog-iidim": "dim",
+  "g-minprog-iii": "maj",
+  "g-minprog-iv": "min",
+  "g-minprog-v": "min",
+  "g-minprog-vi": "maj",
+  "g-minprog-vii": "maj"
+};
 
 
 // Where are the additional SVG files located? Relative to index.html!
@@ -889,6 +912,9 @@ function comptoolsChordProgressions(cont_class, root, scale){
         // Set the width/height
         self.maj_prog.attr("width", the_conw);
         self.maj_prog.attr("height", the_conh);
+        
+        // Initialize the text
+        self.initializeMajorText();
 
     });
     
@@ -907,11 +933,33 @@ function comptoolsChordProgressions(cont_class, root, scale){
         // Set the width/height
         self.min_prog.attr("width", the_conw);
         self.min_prog.attr("height", the_conh);
+        
+        // Initialize the text
+        self.initializeMinorText();
 
     });
 }
 
+// Erases text and prepares the fields for future values
+comptoolsChordProgressions.prototype.initializeMajorText = function(){
 
+    for (var k in PROGBUILD_MAJOR_SVG_RELATIONS){
+        d3.selectAll(".chord-progressions svg g." + k + " text")
+                .attr("text-anchor", "middle")
+                .style("font-size", "16px")
+                .text("");
+    }
+};
+
+comptoolsChordProgressions.prototype.initializeMinorText = function(){
+    
+    for (var k in PROGBUILD_MINOR_SVG_RELATIONS){
+        d3.selectAll(".chord-progressions svg g." + k + " text")
+                .attr("text-anchor", "middle")
+                .style("font-size", "16px")
+                .text("");
+    }
+};
 
 
 // The piano keyboard

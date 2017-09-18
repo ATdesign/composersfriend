@@ -27,7 +27,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -49,8 +49,8 @@
      fit-margin-right="10"
      fit-margin-bottom="10"
      inkscape:zoom="0.9914225"
-     inkscape:cx="240.35063"
-     inkscape:cy="161.70108"
+     inkscape:cx="22.76826"
+     inkscape:cy="180.80567"
      inkscape:window-x="1972"
      inkscape:window-y="188"
      inkscape:window-maximized="0"
@@ -243,9 +243,8 @@
        transform="translate(-127,-163)">V</text>
   </g>
   <g
-     id="g4051"
-     class="g-majprog-i"
-     transform="translate(-0.33224492,4.0293185)">
+     id="g79"
+     class="g-majprog-i">
     <rect
        style="fill:none;stroke-linecap:butt;stroke-miterlimit:1.45000005"
        id="rect44"
@@ -254,16 +253,16 @@
        height="33"
        width="97"
        x="142"
-       transform="translate(-127,-163)" />
+       transform="translate(-127.33224,-158.97068)" />
+    <text
+       style="line-height:0%;font-family:sans-serif;stroke:none"
+       id="text4049"
+       clip-path="url(#clipPath2)"
+       y="237.2139"
+       xml:space="preserve"
+       x="188.83299"
+       transform="translate(-127.33225,-158.97068)">I</text>
   </g>
-  <text
-     transform="translate(-127.33225,-158.97068)"
-     x="188.83299"
-     xml:space="preserve"
-     y="237.2139"
-     clip-path="url(#clipPath2)"
-     id="text4049"
-     style="line-height:0%;font-family:sans-serif;stroke:none">I</text>
   <g
      id="g4078"
      class="g-majprog-i"

@@ -38,8 +38,13 @@ div.theory{
     height: 400px;
 }
 
+/* Chord progressions chart */
 div.chord-progressions{
     width: 100%;
+    
+    svg text{
+        font-family: 'Fira Sans', sans;
+    }
 }
 
 div#id-major-progressions{
