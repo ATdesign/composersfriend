@@ -16,7 +16,7 @@
    viewBox="0 0 745 304.36557"
    id="svg2"
    version="1.1"
-   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
+   inkscape:version="0.48.5 r10040"
    sodipodi:docname="minor_chord_progressions.svg"
    style="font-style:normal;font-weight:normal;font-size:12px;font-family:Dialog;color-interpolation:auto;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto">
   <metadata
@@ -44,11 +44,11 @@
      inkscape:window-height="828"
      id="namedview118"
      showgrid="false"
-     inkscape:zoom="2.1457034"
-     inkscape:cx="150.44721"
-     inkscape:cy="183.18797"
-     inkscape:window-x="3993"
-     inkscape:window-y="212"
+     inkscape:zoom="1.5172414"
+     inkscape:cx="413.49332"
+     inkscape:cy="253.13052"
+     inkscape:window-x="130"
+     inkscape:window-y="149"
      inkscape:window-maximized="0"
      inkscape:current-layer="svg2"
      fit-margin-top="10"
@@ -137,12 +137,15 @@
        x="142" />
     <text
        transform="translate(24,-163)"
-       style="line-height:0%;font-family:sans-serif;stroke:none"
+       style="line-height:0%;stroke:none;font-family:sans-serif"
        id="text22"
        clip-path="url(#clipPath2)"
        y="320.2139"
        xml:space="preserve"
-       x="185.49899">III</text>
+       x="189.39548"
+       sodipodi:linespacing="0%"><tspan
+         style="text-anchor:middle;text-align:center"
+         id="tspan3064">III</tspan></text>
   </g>
   <g
      id="g3236"
@@ -159,12 +162,15 @@
        x="293" />
     <text
        transform="translate(24,-163)"
-       style="line-height:0%;font-family:sans-serif;stroke:none"
+       style="line-height:0%;stroke:none;font-family:sans-serif"
        id="text26"
        clip-path="url(#clipPath2)"
        y="320.2139"
        xml:space="preserve"
-       x="335.83109">VI</text>
+       x="340.94046"
+       sodipodi:linespacing="0%"><tspan
+         style="text-anchor:middle;text-align:center"
+         id="tspan3066">VI</tspan></text>
   </g>
   <g
      id="g3240"
@@ -181,12 +187,15 @@
        x="380" />
     <text
        transform="translate(24,-163)"
-       style="line-height:0%;font-family:sans-serif;stroke:none"
+       style="line-height:0%;stroke:none;font-family:sans-serif"
        id="text30"
        clip-path="url(#clipPath2)"
        y="237.2139"
        xml:space="preserve"
-       x="424.16699">iv</text>
+       x="428.03418"
+       sodipodi:linespacing="0%"><tspan
+         style="text-anchor:middle;text-align:center"
+         id="tspan3068">iv</tspan></text>
   </g>
   <g
      id="g3244"
@@ -203,12 +212,15 @@
        x="380" />
     <text
        transform="translate(24,-163)"
-       style="line-height:0%;font-family:sans-serif;stroke:none"
+       style="line-height:0%;stroke:none;font-family:sans-serif"
        id="text34"
        clip-path="url(#clipPath2)"
        y="403.2139"
        xml:space="preserve"
-       x="414.49899">ii dim</text>
+       x="427.7236"
+       sodipodi:linespacing="0%"><tspan
+         style="text-anchor:middle;text-align:center"
+         id="tspan3076">ii dim</tspan></text>
   </g>
   <g
      id="g3248"
@@ -225,12 +237,15 @@
        x="539" />
     <text
        transform="translate(24,-163)"
-       style="line-height:0%;font-family:sans-serif;stroke:none"
+       style="line-height:0%;stroke:none;font-family:sans-serif"
        id="text38"
        clip-path="url(#clipPath2)"
        y="237.2139"
        xml:space="preserve"
-       x="580.16412">VII</text>
+       x="586.93756"
+       sodipodi:linespacing="0%"><tspan
+         style="text-anchor:middle;text-align:center"
+         id="tspan3070">VII</tspan></text>
   </g>
   <g
      id="g3252"
@@ -247,12 +262,15 @@
        x="539" />
     <text
        transform="translate(24,-163)"
-       style="line-height:0%;font-family:sans-serif;stroke:none"
+       style="line-height:0%;stroke:none;font-family:sans-serif"
        id="text42"
        clip-path="url(#clipPath2)"
        y="403.2139"
        xml:space="preserve"
-       x="584.5">v</text>
+       x="587.35352"
+       sodipodi:linespacing="0%"><tspan
+         style="text-anchor:middle;text-align:center"
+         id="tspan3074">v</tspan></text>
   </g>
   <g
      id="g3224"
@@ -269,12 +287,15 @@
        x="142" />
     <text
        transform="translate(24,-163)"
-       style="line-height:0%;font-family:sans-serif;stroke:none"
+       style="line-height:0%;stroke:none;font-family:sans-serif"
        id="text46"
        clip-path="url(#clipPath2)"
        y="237.2139"
        xml:space="preserve"
-       x="188.83299">I</text>
+       x="189.40135"
+       sodipodi:linespacing="0%"><tspan
+         style="text-anchor:middle;text-align:center"
+         id="tspan3060">I</tspan></text>
   </g>
   <g
      id="g3256"
@@ -291,12 +312,15 @@
        x="618" />
     <text
        transform="translate(24,-163)"
-       style="line-height:0%;font-family:sans-serif;stroke:none"
+       style="line-height:0%;stroke:none;font-family:sans-serif"
        id="text50"
        clip-path="url(#clipPath2)"
        y="320.2139"
        xml:space="preserve"
-       x="665.16699">i</text>
+       x="665.69434"
+       sodipodi:linespacing="0%"><tspan
+         style="text-anchor:middle;text-align:center"
+         id="tspan3072">i</tspan></text>
   </g>
   <path
      d="m 239,315.5 h 44"
@@ -553,13 +577,16 @@
          style="fill:none;stroke-linecap:butt;stroke-miterlimit:1.45000005"
          transform="translate(24,-163)" />
       <text
-         x="185.49899"
+         x="192.27243"
          xml:space="preserve"
          y="320.2139"
          clip-path="url(#clipPath2-5)"
          id="text22-1"
-         style="line-height:0%;font-family:sans-serif;stroke:none"
-         transform="translate(24,-163)">VII</text>
+         style="line-height:0%;stroke:none;font-family:sans-serif"
+         transform="translate(24,-163)"
+         sodipodi:linespacing="0%"><tspan
+           style="text-anchor:middle;text-align:center"
+           id="tspan3062">VII</tspan></text>
     </g>
   </g>
   <path

@@ -29,23 +29,23 @@ var CHBUILD_DEFAULT_ADD_CLASS = 'chordbuild-add';
 
 // Chord progressions
 var PROGBUILD_MAJOR_SVG_RELATIONS = {
-  "g-majprog-i": "maj",
-  "g-majprog-ii": "min",
-  "g-majprog-iii": "min",
-  "g-majprog-iv": "maj",
-  "g-majprog-v": "maj",
-  "g-majprog-vi": "min",
-  "g-majprog-viidim": "dim"
+    "g-majprog-i": "maj",
+    "g-majprog-ii": "min",
+    "g-majprog-iii": "min",
+    "g-majprog-iv": "maj",
+    "g-majprog-v": "maj",
+    "g-majprog-vi": "min",
+    "g-majprog-viidim": "dim"
 };
 
 var PROGBUILD_MINOR_SVG_RELATIONS = {
-  "g-minprog-i": "min",
-  "g-minprog-iidim": "dim",
-  "g-minprog-iii": "maj",
-  "g-minprog-iv": "min",
-  "g-minprog-v": "min",
-  "g-minprog-vi": "maj",
-  "g-minprog-vii": "maj"
+    "g-minprog-i": "min",
+    "g-minprog-iidim": "dim",
+    "g-minprog-iii": "maj",
+    "g-minprog-iv": "min",
+    "g-minprog-v": "min",
+    "g-minprog-vi": "maj",
+    "g-minprog-vii": "maj"
 };
 
 
@@ -153,6 +153,27 @@ function get_duration_in_seconds(dur) {
 
 function get_duration_in_ms(dur) {
     return 1000 * get_duration_in_seconds(dur);
+}
+
+function add_chord_to_player(note, chord) {
+    var my_chord = new comptoolsChordPlayerElement(note, chord);
+    chord_list.push(my_chord);
+
+    // Because the relationship is many to one, we'll have to use
+    // a config variable here---reference to instrument glue.
+    // Therefore, it must be assigned beforehand.
+    if (comptools_config.instrument_glue !== undefined) {
+        my_chord.selection_callback =
+                comptools_config
+                .instrument_glue
+                .funHighlightChordListElementNotes;
+    }
+
+    if (comptools_config.chord_player !== undefined) {
+        comptools_config.chord_player.update_callback();
+    }
+
+    play_chord(note, chord, 3, 0.5);
 }
 
 // Audio context sound player
@@ -518,10 +539,13 @@ function InstrumentGlue() {
     this.objArray = new Array();
 
     // Bind theory object
-    this.theory = new Object();
+    this.theory = null;
 
     // Bind chord builder object
-    this.chord_builder = new Object();
+    this.chord_builder = null;
+
+    // Bind chord progressions object
+    this.chord_progressions = null;
 
     var self = this;
 
@@ -542,8 +566,13 @@ function InstrumentGlue() {
         for (var k = 0; k < self.objArray.length; k++) {
             if (myth.scale_data !== "none") {
                 self.objArray[k].updateNotes(myth.scale_data["notes"]);
+                
+                // Also update chord progressions diagram for the given scale
+                self.chord_progressions.updateChords(myth.root, myth.scale);
+                
             } else {
                 self.objArray[k].clearNotes();
+                self.chord_progressions.clearChords();
             }
 
         }
@@ -859,21 +888,21 @@ comptoolsTheory.prototype.selection_callback = function () {
 };
 
 // Chord progressions
-function comptoolsChordProgressions(cont_class, root, scale){
-    
+function comptoolsChordProgressions(cont_class, root, scale) {
+
     // Draw immediately
     var draw_now = false;
-    
+
     // Check input arguments
-    if (root === undefined || scale === undefined){
+    if (root === undefined || scale === undefined) {
         root = 'none';
         scale = 'none';
-    }else{
+    } else {
         // Otherwise we'd need to draw this immediately, 
         // and we do this after everything is initialized
         draw_now = true;
     }
-    
+
     var self = this;
 
     // Current root
@@ -881,7 +910,7 @@ function comptoolsChordProgressions(cont_class, root, scale){
 
     // Current scale
     this.scale = scale;
-    
+
     // Major and minor progression container element references
     this.maj_prog = null;
     this.min_prog = null;
@@ -889,7 +918,7 @@ function comptoolsChordProgressions(cont_class, root, scale){
     // Get the correct SVG file and add it to the specified container
     var major_progressions = SVG_DIRECTORY + "major_chord_progressions.svg";
     var minor_progressions = SVG_DIRECTORY + "minor_chord_progressions.svg";
-    
+
     // Add the chord progression div containers
     d3.select(cont_class).append('div').attr('id', 'id-major-progressions');
     d3.select(cont_class).append('div')
@@ -912,12 +941,12 @@ function comptoolsChordProgressions(cont_class, root, scale){
         // Set the width/height
         self.maj_prog.attr("width", the_conw);
         self.maj_prog.attr("height", the_conh);
-        
+
         // Initialize the text
         self.initializeMajorText();
 
     });
-    
+
     // Do the same for minor progressions
     d3.xml(minor_progressions, function (xml) {
         document.getElementById('id-minor-progressions').appendChild(xml.documentElement);
@@ -933,7 +962,7 @@ function comptoolsChordProgressions(cont_class, root, scale){
         // Set the width/height
         self.min_prog.attr("width", the_conw);
         self.min_prog.attr("height", the_conh);
-        
+
         // Initialize the text
         self.initializeMinorText();
 
@@ -941,26 +970,110 @@ function comptoolsChordProgressions(cont_class, root, scale){
 }
 
 // Erases text and prepares the fields for future values
-comptoolsChordProgressions.prototype.initializeMajorText = function(){
+comptoolsChordProgressions.prototype.initializeMajorText = function () {
 
-    for (var k in PROGBUILD_MAJOR_SVG_RELATIONS){
+    for (var k in PROGBUILD_MAJOR_SVG_RELATIONS) {
         d3.selectAll(".chord-progressions svg g." + k + " text")
                 .attr("text-anchor", "middle")
                 .style("font-size", "16px")
                 .text("");
+
+        d3.selectAll(".chord-progressions svg g." + k + " rect")
+                .style("fill", "#fff");
+
+        d3.selectAll(".chord-progressions svg g." + k)
+                .style("cursor", "pointer")
+                .on("click", function () {
+                    return null;
+                });
     }
 };
 
-comptoolsChordProgressions.prototype.initializeMinorText = function(){
+comptoolsChordProgressions.prototype.initializeMinorText = function () {
+
+    for (var k in PROGBUILD_MINOR_SVG_RELATIONS) {
+        d3.selectAll(".chord-progressions svg g." + k + " text")
+                .attr("text-anchor", "middle")
+                .style("font-size", "16px")
+                .text("");
+
+        d3.selectAll(".chord-progressions svg g." + k + " rect")
+                .style("fill", "#fff");
+
+        d3.selectAll(".chord-progressions svg g." + k)
+                .style("cursor", "pointer")
+                .on("click", function () {
+                    return null;
+                });
+    }
+};
+
+comptoolsChordProgressions.prototype.clearChords = function(){
     
-    for (var k in PROGBUILD_MINOR_SVG_RELATIONS){
+    for (var k in PROGBUILD_MAJOR_SVG_RELATIONS) {
         d3.selectAll(".chord-progressions svg g." + k + " text")
-                .attr("text-anchor", "middle")
-                .style("font-size", "16px")
                 .text("");
+
+        d3.selectAll(".chord-progressions svg g." + k)
+                .on("click", function () {
+                    return null;
+                });
+    }
+    
+    for (var k in PROGBUILD_MINOR_SVG_RELATIONS) {
+        d3.selectAll(".chord-progressions svg g." + k + " text")
+                .text("");
+
+        d3.selectAll(".chord-progressions svg g." + k)
+                .on("click", function () {
+                    return null;
+                });
+    }
+    
+};
+
+comptoolsChordProgressions.prototype.updateChords = function (note, scale) {
+
+    self = this;
+    
+    // Get the notes of the scale first
+    var notes = get_scale(note, scale).notes;
+    
+    if (scale === "major") {
+        d3.select("#id-major-progressions").style("display", "block");
+        d3.select("#id-minor-progressions").style("display", "none");
+
+        var it = 0;
+        for (var k in PROGBUILD_MAJOR_SVG_RELATIONS) {
+            d3.selectAll(".chord-progressions svg g." + k + " text")
+                    .text(notes[it] + " " + PROGBUILD_MAJOR_SVG_RELATIONS[k]);
+
+            d3.selectAll(".chord-progressions svg g." + k)
+                    .on("click", self.handle_add_chord(notes[it], PROGBUILD_MAJOR_SVG_RELATIONS[k]));
+            it++;
+        }
+
+    } else if (scale === "minor") {
+        d3.select("#id-minor-progressions").style("display", "block");
+        d3.select("#id-major-progressions").style("display", "none");
+
+        var it = 0;
+        for (var k in PROGBUILD_MINOR_SVG_RELATIONS) {
+            d3.selectAll(".chord-progressions svg g." + k + " text")
+                    .text(notes[it] + " " + PROGBUILD_MINOR_SVG_RELATIONS[k]);
+
+            d3.selectAll(".chord-progressions svg g." + k)
+                    .on("click", self.handle_add_chord(notes[it], PROGBUILD_MINOR_SVG_RELATIONS[k]));
+            it++;
+        }
     }
 };
 
+comptoolsChordProgressions.prototype.handle_add_chord = function(note,chord){
+    return function(){
+        add_chord_to_player(note, chord);
+    };
+};
 
 // The piano keyboard
 function comptoolsKeyboard(cont_class, range, options) {
@@ -1524,7 +1637,7 @@ function comptoolsChordbuilder(cont_class) {
 
         now_g = this.svg_chordbuild.append("g")
                 .attr("class", CHBUILD_DEFAULT_MARKER_CLASS + " "
-                      + "chb-n-" + note_array[k].replace("#","s").toLowerCase())
+                        + "chb-n-" + note_array[k].replace("#", "s").toLowerCase())
                 .attr("id", "cbnote-" + k)
                 .on("click", this.update_note());
 
@@ -1570,7 +1683,7 @@ function comptoolsChordbuilder(cont_class) {
 
         now_g = this.svg_chordbuild.append("g")
                 .attr("class", CHBUILD_DEFAULT_CHORD_CLASS + " "
-                     + "chb-c-" + chord_str[k])
+                        + "chb-c-" + chord_str[k])
                 .attr("id", "cbchord-" + k)
                 .on("click", this.update_chord());
 
@@ -1657,7 +1770,7 @@ comptoolsChordbuilder.prototype.edit_chord_in_player = function () {
     if (comptools_config.chord_player !== undefined &&
             comptools_config.chord_player.current_chord !== null &&
             this.current_note !== "none" &&
-            this.current_chord !== "none"){
+            this.current_chord !== "none") {
         comptools_config.chord_player.current_chord.updateChord(
                 this.current_note, this.current_chord);
     }
@@ -1666,28 +1779,28 @@ comptoolsChordbuilder.prototype.edit_chord_in_player = function () {
 // Note that his function DOES NOT update the fretboards and keyboards
 // What it does is it only highlights the desired note and chord in the selector
 comptoolsChordbuilder.prototype.set_note_chord = function (note, chord) {
-    
+
     // Set current note and chord. We assume they are legal!
     this.current_note = note;
     this.current_chord = chord;
-    
+
     // Get class names
     var note_cl = "chb-n-" + note.replace("#", "s").toLowerCase();
     var chord_cl = "chb-c-" + chord;
-    
+
     // Remove all previous highlights
     this.svg_chordbuild.selectAll("." + CHBUILD_DEFAULT_MARKER_CLASS)
-                    .classed(CHBUILD_SELECTED_MARKER, false);
+            .classed(CHBUILD_SELECTED_MARKER, false);
     this.svg_chordbuild.selectAll("." + CHBUILD_DEFAULT_CHORD_CLASS)
-                    .classed(CHBUILD_SELECTED_MARKER, false);
-            
+            .classed(CHBUILD_SELECTED_MARKER, false);
+
     // Find and highlight the correct markers
     this.svg_chordbuild.select("." + note_cl)
-                    .classed(CHBUILD_SELECTED_MARKER, true);
+            .classed(CHBUILD_SELECTED_MARKER, true);
     this.svg_chordbuild.select("." + chord_cl)
-                    .classed(CHBUILD_SELECTED_MARKER, true);
-    
-            
+            .classed(CHBUILD_SELECTED_MARKER, true);
+
+
 };
 
 
@@ -1698,28 +1811,8 @@ comptoolsChordbuilder.prototype.add_chord_to_player = function () {
         if (self.current_chord !== "none" &&
                 self.current_note !== "none")
         {
-            var my_chord = new comptoolsChordPlayerElement(self.current_note,
-                    self.current_chord);
-            chord_list.push(my_chord);
-
-            // Because the relationship is many to one, we'll have to use
-            // a config variable here---reference to instrument glue.
-            // Therefore, it must be assigned beforehand.
-            if (comptools_config.instrument_glue !== undefined) {
-                my_chord.selection_callback =
-                        comptools_config
-                        .instrument_glue
-                        .funHighlightChordListElementNotes;
-            }
-
-            if (comptools_config.chord_player !== undefined) {
-                comptools_config.chord_player.update_callback();
-            }
-
-            play_chord(self.current_note, self.current_chord, 3, 0.5);
+            add_chord_to_player(self.current_note, self.current_chord);
         }
-
-
     };
 };
 
@@ -1769,11 +1862,11 @@ function comptoolsChordPlayerElement(root, chord, dur, oct)
     this.get_oct = function () {
         return CHORD_OCTAVES[this.octave_index];
     };
-    
+
     // Play this chord
     this.play = function () {
         play_chord(this.my_root, this.my_chord, this.get_oct(),
-                    get_duration_in_seconds(this.get_dur()));
+                get_duration_in_seconds(this.get_dur()));
     }
 
     // Whether to use legato with several same chords
@@ -1867,19 +1960,19 @@ function comptoolsChordPlayerElement(root, chord, dur, oct)
 
 
     // Update chord
-    this.updateChord = function(note, chord){
-        
+    this.updateChord = function (note, chord) {
+
         // Replace note and chord assuming they are correct
         this.my_root = note;
         this.my_chord = chord;
-        
+
         // Update text
         d3.select("#" + this.elem_id + " span.chord-text")
                 .html(note + " " + chord);
-        
+
         // Play the chord
         this.play();
-        
+
     };
 
     // Update duration
@@ -1919,10 +2012,10 @@ function comptoolsChordPlayerElement(root, chord, dur, oct)
     {
         // Check if this object is the selected one in player and remove it
         if (comptools_config.chord_player !== undefined &&
-                this === comptools_config.chord_player.current_chord){
+                this === comptools_config.chord_player.current_chord) {
             comptools_config.chord_player.current_chord = null
         }
-        
+
         this.list_elem.remove();
         chord_list.remove_obj_by_prop('elem_id', this.elem_id);
         return true;
@@ -1947,16 +2040,16 @@ comptoolsChordPlayerElement.prototype.clickHandler = function ()
 
         // Assign selection
         d3.select(the_elem).classed("chord-selected", action);
-        
+
         // Update the player with currently selected chord information
         if (comptools_config.chord_player !== undefined && action) {
             comptools_config.chord_player.current_chord = self;
-        }else{
+        } else {
             comptools_config.chord_player.current_chord = null;
         }
 
         // Assign selection in chord builder as well
-        if (comptools_config.chord_builder !== undefined && action){
+        if (comptools_config.chord_builder !== undefined && action) {
             comptools_config.chord_builder
                     .set_note_chord(self.my_root, self.my_chord);
         }
@@ -2028,13 +2121,13 @@ function comptoolsChordPlayer(player_class)
         if (!this.playing) {
             // Stop transport and cancel all events
             Tone.Transport.stop();
-            
+
             // Stop MIDI, if present
             if (comptools_midi_player !== undefined &&
-                    comptools_midi_player.ready){
+                    comptools_midi_player.ready) {
                 comptools_midi_player.flushNoteBuffer();
             }
-            
+
             return true;
         }
 
@@ -2106,18 +2199,18 @@ function comptoolsChordPlayer(player_class)
         // Select this chord
         d3.select('#' + current_event.highlight_id + " div.uk-card")
                 .classed('chord-selected', true);
-        
+
         // Assign selection in chord builder as well
-        if (comptools_config.chord_builder !== undefined){
+        if (comptools_config.chord_builder !== undefined) {
             comptools_config.chord_builder
                     .set_note_chord(current_event.object.my_root,
-                                    current_event.object.my_chord);
+                            current_event.object.my_chord);
         }
-        
+
         // Update the player with currently selected chord information
         if (comptools_config.chord_player !== undefined) {
             this.current_chord = current_event.object;
-        }else{
+        } else {
             this.current_chord = null;
         }
 
@@ -2394,64 +2487,64 @@ comptoolsMIDIPlayer = function () {
 
 
     };
-    
+
     this.note_buffer = [];  // Stores on notes to flush on next send
-    
-    this.flushNoteBuffer = function(){
+
+    this.flushNoteBuffer = function () {
         this.sendOffMessage(this.note_buffer); // Stop playing notes
         this.note_buffer = []; // Remove all notes from buffer
     }
-    
-    this.sendOffMessage = function(notes, velocity){
-        
+
+    this.sendOffMessage = function (notes, velocity) {
+
         if (!this.ready) {
             return false;
         }
-        
+
         var myvel = 0x64;
         if (velocity !== undefined) {
             myvel = velocity;
         }
-        
+
         var noteOffArray = [];
         for (var k = 0; k < notes.length; k++) {
             var n = get_semitone_distance(notes[k]) + 11;
             noteOffArray.push(0x80, n, myvel);
         }
-        
+
         var output = this.midi.outputs.get(this.MIDI_current_output);
         output.send(noteOffArray);
-        
+
     }
-    
+
     // Special function that first sends buffered off messages
-    this.CyclicSendOnMessage = function(notes, velocity){
-        
+    this.CyclicSendOnMessage = function (notes, velocity) {
+
         if (!this.ready) {
             return false;
         }
-        
+
         var myvel = 0x64;
         if (velocity !== undefined) {
             myvel = velocity;
         }
-        
+
         // Send buffered off messages
         this.flushNoteBuffer();
-        
+
         var noteOnArray = [];
         for (var k = 0; k < notes.length; k++) {
             var n = get_semitone_distance(notes[k]) + 11;
             noteOnArray.push(0x90, n, myvel);
         }
-        
+
         var output = this.midi.outputs.get(this.MIDI_current_output);
         output.send(noteOnArray);
-        
+
         // Assign future off messages
         this.note_buffer = notes;
-        
-    }
+
+    };
 
     // Sends the notes to the port with specified duration (no sync)
     this.sendOnOffMessage = function (notes, duration_in_ms, velocity) {
@@ -2482,7 +2575,7 @@ comptoolsMIDIPlayer = function () {
 
         // Send noteon and then noteoff with a delay
         output.send(noteOnArray);
-        output.send(noteOffArray, 
+        output.send(noteOffArray,
                 window.performance.now() + duration_in_ms);
 
         return true;

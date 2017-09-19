@@ -153,6 +153,10 @@
 
             the_glue.theory = my_theory;
             my_theory.selection_callback = the_glue.funHighlightNotes;
+            
+            // This is also bound to theory since chord
+            // progressions appear for the given scale
+            the_glue.chord_progressions = my_progbuild;
 
             the_glue.chord_builder = my_chbuild;
             my_chbuild.selection_callback = the_glue.funHighlightChordNotes;
