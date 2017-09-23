@@ -566,10 +566,10 @@ function InstrumentGlue() {
         for (var k = 0; k < self.objArray.length; k++) {
             if (myth.scale_data !== "none") {
                 self.objArray[k].updateNotes(myth.scale_data["notes"]);
-                
+
                 // Also update chord progressions diagram for the given scale
                 self.chord_progressions.updateChords(myth.root, myth.scale);
-                
+
             } else {
                 self.objArray[k].clearNotes();
                 self.chord_progressions.clearChords();
@@ -1008,8 +1008,8 @@ comptoolsChordProgressions.prototype.initializeMinorText = function () {
     }
 };
 
-comptoolsChordProgressions.prototype.clearChords = function(){
-    
+comptoolsChordProgressions.prototype.clearChords = function () {
+
     for (var k in PROGBUILD_MAJOR_SVG_RELATIONS) {
         d3.selectAll(".chord-progressions svg g." + k + " text")
                 .text("");
@@ -1019,7 +1019,7 @@ comptoolsChordProgressions.prototype.clearChords = function(){
                     return null;
                 });
     }
-    
+
     for (var k in PROGBUILD_MINOR_SVG_RELATIONS) {
         d3.selectAll(".chord-progressions svg g." + k + " text")
                 .text("");
@@ -1029,16 +1029,16 @@ comptoolsChordProgressions.prototype.clearChords = function(){
                     return null;
                 });
     }
-    
+
 };
 
 comptoolsChordProgressions.prototype.updateChords = function (note, scale) {
 
     self = this;
-    
+
     // Get the notes of the scale first
-    var notes = get_scale(note, scale).notes;
-    
+    var notes = get_scale(flats2sharps(note), scale).notes;
+
     if (scale === "major") {
         d3.select("#id-major-progressions").style("display", "block");
         d3.select("#id-minor-progressions").style("display", "none");
@@ -1069,8 +1069,8 @@ comptoolsChordProgressions.prototype.updateChords = function (note, scale) {
     }
 };
 
-comptoolsChordProgressions.prototype.handle_add_chord = function(note,chord){
-    return function(){
+comptoolsChordProgressions.prototype.handle_add_chord = function (note, chord) {
+    return function () {
         add_chord_to_player(note, chord);
     };
 };
@@ -2013,11 +2013,16 @@ function comptoolsChordPlayerElement(root, chord, dur, oct)
         // Check if this object is the selected one in player and remove it
         if (comptools_config.chord_player !== undefined &&
                 this === comptools_config.chord_player.current_chord) {
-            comptools_config.chord_player.current_chord = null
+            comptools_config.chord_player.current_chord = null;
         }
 
         this.list_elem.remove();
         chord_list.remove_obj_by_prop('elem_id', this.elem_id);
+
+        if (comptools_config.chord_player !== undefined) {
+            comptools_config.chord_player.update_callback();
+        }
+
         return true;
     };
 
@@ -2107,6 +2112,19 @@ function comptoolsChordPlayer(player_class)
     d3.select(player_class + ' .chord-play').on('click', function () {
         self.togglePlay();
     });
+
+    // Pressing the space bar has the same effect
+    // Bind a keyboard event as well
+    Mousetrap.bind("space", function (e) {
+        self.togglePlay();
+    });
+
+    // Prevent default behavior of space bar as well
+    window.onkeydown = function (e) {
+        if (e.keyCode === 32 && e.target === document.body) {
+            e.preventDefault();
+        }
+    };
 
     // Event: begin play
     this.togglePlay = function () {
