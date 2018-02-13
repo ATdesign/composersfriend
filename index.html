@@ -77,12 +77,14 @@
                     <h3 class="uk-accordion-title">Guitar</h3>
                     <div class="uk-accordion-content">
                         <div class="fretboard fb-guitar"></div>
+                        <span class="guitar-update-tuning">Change tuning</span>
                     </div>
                 </li>
                 <li>
                     <h3 class="uk-accordion-title">Bass</h3>
                     <div class="uk-accordion-content">
                         <div class="fretboard-bass fb-bass"></div>
+                        <span class="bass-update-tuning">Change tuning</span>
                     </div>
                 </li>
                 <li>
@@ -183,6 +185,21 @@
             // Experimental MIDI player feature
             comptools_midi_player = new comptoolsMIDIPlayer();
             comptools_midi_player.initialize();
+            
+            // Additional options for tuning
+            $('.guitar-update-tuning').on('click', function(){
+               var tuning = prompt("New tuning", fb_guitar.tuning);
+               if (tuning !== null){
+                   fb_guitar.updateTuning(tuning);
+               }
+            });
+            
+            $('.bass-update-tuning').on('click', function(){
+               var tuning = prompt("New tuning", fb_bass.tuning);
+               if (tuning !== null){
+                   fb_bass.updateTuning(tuning);
+               }
+            });
 
         </script>
 

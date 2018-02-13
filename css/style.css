@@ -435,4 +435,14 @@ div.fretboard-bass {
     stroke: #666;
     stroke-width: 2px; }
 
+/* Various options */
+.guitar-update-tuning, .bass-update-tuning {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-style: italic;
+  cursor: pointer; }
+
 /*# sourceMappingURL=style.css.map */
