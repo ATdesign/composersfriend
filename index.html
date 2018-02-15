@@ -77,7 +77,7 @@
                     <h3 class="uk-accordion-title">Guitar</h3>
                     <div class="uk-accordion-content">
                         <div class="fretboard fb-guitar"></div>
-                        <span class="guitar-update-tuning">Change tuning</span>
+                        <span class="guitar-update-tuning"><span class="change">Change tuning</span>, <span class="standard">set to standard</span>, <span class="dropd">set to Drop D</span></span>
                     </div>
                 </li>
                 <li>
@@ -187,11 +187,21 @@
             comptools_midi_player.initialize();
             
             // Additional options for tuning
-            $('.guitar-update-tuning').on('click', function(){
+            $('.guitar-update-tuning .change').on('click', function(){
                var tuning = prompt("New tuning", fb_guitar.tuning);
                if (tuning !== null){
                    fb_guitar.updateTuning(tuning);
                }
+            });
+            
+            // Predefined: standard
+            $('.guitar-update-tuning .standard').on('click', function(){
+                fb_guitar.updateTuning("E4B3G3D3A2E2");
+            });
+            
+            // Predefined: drop d
+            $('.guitar-update-tuning .dropd').on('click', function(){
+                fb_guitar.updateTuning("E4B3G3D3A2D2");
             });
             
             $('.bass-update-tuning').on('click', function(){

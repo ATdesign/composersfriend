@@ -1651,22 +1651,20 @@ function comptoolsFretboard(cont_class, tuning, options) {
                     });
 
             // Save notes, but only if there are any
-            if (fbh_notes.length > 0 &&
-                    fbhr_notes.length > 0 &&
-                    fbs_notes.length > 0) {
-
+            if (fbh_notes.length === 0 &&
+                    fbhr_notes.length === 0 &&
+                    fbs_notes.length === 0) {
+                this.notes = null;
+            } else
+            {
                 this.notes = {fbh: fbh_notes,
                     fbhr: fbhr_notes,
                     fbs: fbs_notes};
-            } else
-            {
-                this.notes = null;
             }
         } else
         {
             this.notes = null;
         }
-
 
     };
 
