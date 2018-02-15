@@ -1308,16 +1308,19 @@ function comptoolsFretboard(cont_class, tuning, options) {
     this.svg_fretboard = null;
 
     this.updateTuning = function (tuning) {
-        
+
         // Check optional argument
         if (typeof tuning !== 'undefined' && tuning !== null && tuning !== "")
         {
             this.tuning = tuning.toUpperCase(); // Update tuning property
         }
-        
+
         var cont_class = this.cont_class;
         var fret_current_tuning = this.tuning;
-        
+
+        // Save notes
+        this.saveHighlightedNotes();
+
         // Remove the SVG (if it exists)
         d3.select(cont_class).selectAll('*').remove()
 
@@ -1503,9 +1506,9 @@ function comptoolsFretboard(cont_class, tuning, options) {
                     .on('click', this.clickHandler());
 
         }
-        
+
         // Restore notes, if needed
-        this.restoreNotes();
+        this.restoreHighlightedNotes();
 
     }
 
@@ -1523,12 +1526,6 @@ function comptoolsFretboard(cont_class, tuning, options) {
 
     };
 
-    // TODO: Restore notes
-    this.restoreNotes = function(){
-        if (this.notes !== null){
-            // Do some magic here
-        }
-    };
 
     // Draw based on note sets, e.g., ["A", "B", "C", "D", "E", "F#", "G"]
     this.updateNotes = function (notes, display) {
@@ -1605,6 +1602,103 @@ function comptoolsFretboard(cont_class, tuning, options) {
                     });
         }
         this.accidental_state = "sharps";
+    };
+
+    // The following functions are necessary when regeneration of the fretboard
+    // must occur (e.g., tuning changed) while there are notes highlighted on it
+
+    // Store the notes into a placeholder property
+    this.saveHighlightedNotes = function () {
+
+        // Check if the fretboard exists
+        if (this.svg_fretboard !== null) {
+            // We scan three classes of notes based on the highlighting function
+            var rexp_note = /note-([a-g]s?(?!s?[0-9]))/ig;
+            var rexp_noten = /note-([a-g]s?[0-9])/ig;
+
+            var fbh_notes = [];
+            var fbhr_notes = [];
+            var fbs_notes = [];
+
+            this.svg_fretboard.selectAll('.fretboard-marker-highlighted')
+                    .each(function (d, i) {
+                        var capt_note = rexp_note.exec(d3.select(this).attr('class'))[1]
+                                .replace("s", "#").toUpperCase();
+                        rexp_note.lastIndex = 0;
+                        if (fbh_notes.indexOf(capt_note) === -1) {
+                            fbh_notes.push(capt_note);
+                        }
+                    });
+
+            this.svg_fretboard.selectAll('.fretboard-marker-highlighted-root')
+                    .each(function (d, i) {
+                        var capt_note = rexp_note.exec(d3.select(this).attr('class'))[1]
+                                .replace("s", "#").toUpperCase();
+                        rexp_note.lastIndex = 0;
+                        if (fbhr_notes.indexOf(capt_note) === -1) {
+                            fbhr_notes.push(capt_note);
+                        }
+                    });
+
+            this.svg_fretboard.selectAll('.fretboard-marker-selected')
+                    .each(function (d, i) {
+                        var capt_note = rexp_noten.exec(d3.select(this).attr('class'))[1]
+                                .replace("s", "#").toUpperCase();
+                        rexp_noten.lastIndex = 0;
+                        if (fbs_notes.indexOf(capt_note) === -1) {
+                            fbs_notes.push(capt_note);
+                        }
+                    });
+
+            // Save notes, but only if there are any
+            if (fbh_notes.length > 0 &&
+                    fbhr_notes.length > 0 &&
+                    fbs_notes.length > 0) {
+
+                this.notes = {fbh: fbh_notes,
+                    fbhr: fbhr_notes,
+                    fbs: fbs_notes};
+            } else
+            {
+                this.notes = null;
+            }
+        } else
+        {
+            this.notes = null;
+        }
+
+
+    };
+
+    // Restore the notes
+    this.restoreHighlightedNotes = function () {
+        if (this.notes !== null && this.svg_fretboard !== null) {
+            // Do some magic here
+            var k = 0;
+            
+            // Restore the notes from the three arrays
+            for (k=0; k<this.notes.fbh.length; k++){
+                this.svg_fretboard.selectAll('.note-' + 
+                        this.notes.fbh[k].toLowerCase().replace("#","s"))
+                        .classed('fretboard-marker-highlighted', true);
+            }
+            
+            for (k=0; k<this.notes.fbhr.length; k++){
+                this.svg_fretboard.selectAll('.note-' + 
+                        this.notes.fbhr[k].toLowerCase().replace("#","s"))
+                        .classed('fretboard-marker-highlighted-root', true);
+            }
+            
+            for (k=0; k<this.notes.fbs.length; k++){
+                this.svg_fretboard.selectAll('.note-' + 
+                        this.notes.fbs[k].toLowerCase().replace("#","s"))
+                        .classed('fretboard-marker-selected', true);
+            }
+
+        }
+
+        // Remove the stored notes
+        this.notes = null;
     };
 
     // Update the fretboard (initializtion)
