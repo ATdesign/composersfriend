@@ -2507,6 +2507,18 @@ function comptoolsChordPlayer(player_class)
                 + " #" + obj.timeline_id).classed("selected", action);
 
     };
+    
+    // Clear all chords
+    this.clear = function(){
+          if (chord_list !== undefined) {
+              while(chord_list.length > 0){
+                  chord_list[0].delete();
+                  if (comptools_config.chord_player !== undefined) {
+                    comptools_config.chord_player.update_callback();
+                }
+              }
+          }
+    };
 }
 
 // Function to run every time a chord is added, updated, duplicated, or deleted
