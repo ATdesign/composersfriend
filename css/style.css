@@ -402,6 +402,10 @@ div.fretboard-bass {
     margin: 5px;
     padding: 5px;
     cursor: pointer; }
+  .chord-player .chord-player-controls .import-chord-list, .chord-player .chord-player-controls .export-chord-list {
+    margin: 5px;
+    padding: 5px;
+    cursor: pointer; }
   .chord-player .chord-player-controls .chord-play.selected {
     border: 1px solid #d20050; }
   .chord-player .chord-player-controls .chord-bpm {

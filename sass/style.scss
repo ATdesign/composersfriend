@@ -366,6 +366,11 @@ div.fretboard-bass{
         padding: 5px;
         cursor: pointer;
     }
+    .import-chord-list, .export-chord-list{
+        margin: 5px;
+        padding: 5px;
+        cursor: pointer;
+    }
     .chord-play.selected{
         border: 1px solid #d20050;
     }

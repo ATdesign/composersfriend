@@ -210,6 +210,18 @@
                    fb_bass.updateTuning(tuning);
                }
             });
+            
+            $('.import-chord-list').on('click', function(){
+               var chtext = prompt("Paste chord list text here", "");
+               if (chtext !== null){
+                   my_chplayer.import_chords(chtext);
+               }
+            });
+            
+            $('.export-chord-list').on('click', function(){
+               var mytext = my_chplayer.export_chords();
+               prompt("Copy and save this text", mytext);
+            });
 
         </script>
 
