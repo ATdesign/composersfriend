@@ -108,6 +108,7 @@ var comptools_config = {
     "play_sound": true,
     "play_midi": false,
     "instrument_glue": null, // Reference to instrument glue
+    "theory": null, // Reference to theory
     "chord_player": null, // Reference to chord player
     "chord_builder": null // Reference to chord builder
 };
@@ -2246,7 +2247,6 @@ comptoolsChordPlayerElement.prototype.selection_callback = function (my_obj)
 
 function comptoolsChordPlayer(player_class)
 {
-    // TODO: Add import/export of JSON, and export of MIDI
 
     var self = this;
 
@@ -2581,8 +2581,16 @@ function comptoolsChordPlayer(player_class)
         if (text.slice(-1) === ";") {
             text = text.substr(0, text.length - 1);
         }
+        
+        // Add the comment with some additional information
+        var add_com = "";
+        if (comptools_config.theory !== undefined && 
+                comptools_config.theory.root !== "null"){
+            add_com = "{*Scale: " + comptools_config.theory.root + " " +
+                    comptools_config.theory.scale + "*} ";
+        }
 
-        return text;
+        return add_com + text;
     };
 
     // Import chords
@@ -2590,6 +2598,9 @@ function comptoolsChordPlayer(player_class)
 
         // Clear the current chords
         this.clear();
+        
+        // Remove the comments
+        text = text.replace(/{\*.*\*}/, "");
 
         // Parse text
         var the_chords = text.split(";");
