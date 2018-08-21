@@ -18,6 +18,8 @@ var FRET_STRING_MAX_DIAM = 8; // diameters for rendering
 var KEYB_DEFAULT_WHITE_KEY_CLASS = 'keyboard-white-key-default';
 var KEYB_DEFAULT_BLACK_KEY_CLASS = 'keyboard-black-key-default';
 var KEYB_DEFAULT_MARKER_CLASS = 'keyboard-marker-default';
+var KEYB_TEXTLINE_HEIGHT = 20; // Text line is under the keyboard
+var KEYB_TEXT_CLASS = 'keyboard-textline-text';
 
 
 // Chord builder
@@ -1097,9 +1099,12 @@ function comptoolsKeyboard(cont_class, range, options) {
     }
 
     // Get container/width/height
-    // NB! These should always be set!
+    // NB! These should always be set in pixels.
     var keyb_conw = parseFloat(d3.select(cont_class).style("width"));
     var keyb_conh = parseFloat(d3.select(cont_class).style("height"));
+    
+    // Add a little height to original container to account for note names
+    d3.select(cont_class).style("height", (keyb_conh + KEYB_TEXTLINE_HEIGHT) + "px");
 
     // Now we compute all the basic sizes of SVG elements
     var wh_key_height = keyb_conh;
@@ -1118,7 +1123,7 @@ function comptoolsKeyboard(cont_class, range, options) {
 
     this.svg_keyboard = d3.select(cont_class).append("svg")
             .attr("width", keyb_conw)
-            .attr("height", keyb_conh);
+            .attr("height", keyb_conh + KEYB_TEXTLINE_HEIGHT);
 
     // Start populating the svg
     var curr_note = the_range[0][0];
@@ -1170,6 +1175,15 @@ function comptoolsKeyboard(cont_class, range, options) {
                     .attr("width", marker_rad)
                     .attr("height", marker_rad)
                     .attr("class", current_note_class);
+            
+            // In note is C_
+            if (curr_note.indexOf("c") !== -1){
+                this.svg_keyboard.append('text')
+                        .attr('x', curr_x_pos + 2) // TODO: this should be improved
+                        .attr('y', wh_key_height + KEYB_TEXTLINE_HEIGHT)
+                        .attr('class', KEYB_TEXT_CLASS)
+                        .html('C' + curr_note_index);
+            }
 
             // Check if we have a black note to draw after the white key
             another_key = bl_buffer.pop();

@@ -263,6 +263,10 @@ div.chord-player {
 .circle-scale {
   cursor: pointer; }
 
+.keyboard-textline-text {
+  font-size: 12pt;
+  font-weight: bold; }
+
 .keyboard-white-key-default {
   fill: #fff;
   stroke: #000; }
