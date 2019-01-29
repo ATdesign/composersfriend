@@ -1,3 +1,4 @@
+/* Global mixins */
 div.all-container {
   display: block;
   padding-top: 20px;
@@ -31,11 +32,37 @@ div.theory {
   /*margin-top: 25px;
   margin-bottom: 25px;*/
   width: 900px;
-  height: 400px; }
+  height: 400px;
+  -webkit-touch-callout: none;
+  /* iOS Safari */
+  -webkit-user-select: none;
+  /* Safari */
+  -khtml-user-select: none;
+  /* Konqueror HTML */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* Internet Explorer/Edge */
+  user-select: none;
+  /* Non-prefixed version, currently
+     supported by Chrome and Opera */ }
 
 /* Chord progressions chart */
 div.chord-progressions {
-  width: 100%; }
+  width: 100%;
+  -webkit-touch-callout: none;
+  /* iOS Safari */
+  -webkit-user-select: none;
+  /* Safari */
+  -khtml-user-select: none;
+  /* Konqueror HTML */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* Internet Explorer/Edge */
+  user-select: none;
+  /* Non-prefixed version, currently
+     supported by Chrome and Opera */ }
   div.chord-progressions svg text {
     font-family: 'Fira Sans', sans; }
 
@@ -57,12 +84,38 @@ div.chord-builder {
   /*margin-top: 25px;
   margin-bottom: 25px;*/
   width: 800px;
-  height: 200px; }
+  height: 200px;
+  -webkit-touch-callout: none;
+  /* iOS Safari */
+  -webkit-user-select: none;
+  /* Safari */
+  -khtml-user-select: none;
+  /* Konqueror HTML */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* Internet Explorer/Edge */
+  user-select: none;
+  /* Non-prefixed version, currently
+     supported by Chrome and Opera */ }
 
 div.chord-player {
   display: block;
   margin: auto;
-  width: 720px; }
+  width: 720px;
+  -webkit-touch-callout: none;
+  /* iOS Safari */
+  -webkit-user-select: none;
+  /* Safari */
+  -khtml-user-select: none;
+  /* Konqueror HTML */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* Internet Explorer/Edge */
+  user-select: none;
+  /* Non-prefixed version, currently
+     supported by Chrome and Opera */ }
 
 #scale-pentatonic {
   cursor: pointer; }
@@ -210,6 +263,10 @@ div.chord-player {
 .circle-scale {
   cursor: pointer; }
 
+.keyboard-textline-text {
+  font-size: 12pt;
+  font-weight: bold; }
+
 .keyboard-white-key-default {
   fill: #fff;
   stroke: #000; }
@@ -246,12 +303,38 @@ div.fretboard-bass {
   fill: #eee;
   stroke: #555;
   stroke-width: 1px;
-  cursor: pointer; }
+  cursor: pointer;
+  -webkit-touch-callout: none;
+  /* iOS Safari */
+  -webkit-user-select: none;
+  /* Safari */
+  -khtml-user-select: none;
+  /* Konqueror HTML */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* Internet Explorer/Edge */
+  user-select: none;
+  /* Non-prefixed version, currently
+     supported by Chrome and Opera */ }
 
 .fretboard-marker-default {
   fill: #eee;
   stroke: #555;
-  cursor: pointer; }
+  cursor: pointer;
+  -webkit-touch-callout: none;
+  /* iOS Safari */
+  -webkit-user-select: none;
+  /* Safari */
+  -khtml-user-select: none;
+  /* Konqueror HTML */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* Internet Explorer/Edge */
+  user-select: none;
+  /* Non-prefixed version, currently
+     supported by Chrome and Opera */ }
 
 .keyboard-marker-inactive {
   opacity: 0; }
@@ -383,13 +466,13 @@ div.fretboard-bass {
   .chord-option .chord-delete {
     color: red; }
 
-.chord-legato {
+.chord-sustain {
   font-size: 0.8em;
   border: 1px solid #fff;
   cursor: pointer;
   padding: 3px; }
 
-.chord-legato.selected {
+.chord-sustain.selected {
   border: 1px solid #666; }
 
 .chord-player .chord-player-controls {

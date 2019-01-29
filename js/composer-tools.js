@@ -18,6 +18,8 @@ var FRET_STRING_MAX_DIAM = 8; // diameters for rendering
 var KEYB_DEFAULT_WHITE_KEY_CLASS = 'keyboard-white-key-default';
 var KEYB_DEFAULT_BLACK_KEY_CLASS = 'keyboard-black-key-default';
 var KEYB_DEFAULT_MARKER_CLASS = 'keyboard-marker-default';
+var KEYB_TEXTLINE_HEIGHT = 20; // Text line is under the keyboard
+var KEYB_TEXT_CLASS = 'keyboard-textline-text';
 
 
 // Chord builder
@@ -87,7 +89,7 @@ var chord_structures = {
 // Chord list item specific
 var CHORD_LIST_TEMPLATE = "<ul id=\"chord-list\" class=\"uk-grid-small uk-child-width-1-3 uk-child-width-1-4@s uk-text-center\" uk-sortable=\"handle: .uk-sortable-handle\" uk-grid></ul>";
 var CHORD_LIST_CONTROL_TEMPLATE = "<div class=\"chord-player-controls\"><span class=\"chord-play\">Play</span> @ <input class=\"chord-bpm\" type=\"text\" value=\"{{chord-bpm}}\"> bpm <span class=\"import-chord-list\">Import</span> <span class=\"export-chord-list\">Export</span></div><div class=\"chord-player-timeline\"></div><div class=\"chord-player-timeline-measures\"></div>";
-var CHORD_LIST_ITEM_TEMPLATE = "<div class=\"uk-card uk-card-default uk-card-body\"><div class=\"chord-header\"><span class=\"uk-sortable-handle\" uk-icon=\"icon: table\"></span> <span class=\"chord-text\">{{chord-text}}</span> | <span class=\"chord-legato\">leg.</span><br /></div><div class=\"chord-option chord-length\"><span class=\"chord-option-label\">Length:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"{{chord-length}}\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span></div><div class=\"chord-option chord-octave\"><span class=\"chord-option-label\">Octave:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"{{chord-octave}}\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span></div><div class=\"chord-option chord-actions\"><span class=\"chord-controls chord-duplicate\">duplicate</span> | <span class=\"chord-controls chord-delete\">delete</span></div></div>";
+var CHORD_LIST_ITEM_TEMPLATE = "<div class=\"uk-card uk-card-default uk-card-body\"><div class=\"chord-header\"><span class=\"uk-sortable-handle\" uk-icon=\"icon: table\"></span> <span class=\"chord-text\">{{chord-text}}</span> | <span class=\"chord-sustain\">sus.</span><br /></div><div class=\"chord-option chord-length\"><span class=\"chord-option-label\">Length:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"{{chord-length}}\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span></div><div class=\"chord-option chord-octave\"><span class=\"chord-option-label\">Octave:</span><span class=\"chord-controls chord-reduce-value\" uk-icon=\"icon: minus-circle;\"></span><input type=\"text\" class=\"chord-text-input\" value=\"{{chord-octave}}\" /><span class=\"chord-controls chord-add-value\" uk-icon=\"icon: plus-circle;\"></span></div><div class=\"chord-option chord-actions\"><span class=\"chord-controls chord-duplicate\">duplicate</span> | <span class=\"chord-controls chord-delete\">delete</span></div></div>";
 var CHORD_LENGTHS = ["1/16", "1/12", "1/8", "1/6", "1/4", "1/3", "1/2", "1"];
 var CHORD_OCTAVES = [1, 2, 3, 4, 5];
 var CHORD_PLAYER_CLASS = 'chord-player';
@@ -311,7 +313,7 @@ function parse_chord_player() {
         }
     }
 
-    // NB! Note that chords marked as "legato" will NOT play if they are
+    // NB! Note that chords marked as "sustain" will NOT play if they are
     // selected and represent an actual continuation of the previous
     // chord(s). Thus, the user must always select the first chord in the
     // series to hear the full duration. (TODO: Maybe fix this?)
@@ -333,19 +335,19 @@ function parse_chord_player() {
                 play_order_ids[k]);
 
         // Store the first chord to unchanged_chord so we can update
-        // it with additional length if legatos are used in sequence
+        // it with additional length if sustains are used in sequence
         if (k === 0) {
             unchanged_chord = current_chord;
             unchanged_chord_event_ind = 0;
         }
 
         // Check whether this chord is the same as unchanged_chord and there
-        // is a legato mark present (for all chords after the first one)
-        var do_legato = false;
+        // is a sustain mark present (for all chords after the first one)
+        var do_sustain = false;
         if (k > 0 && current_chord.my_root === unchanged_chord.my_root &&
                 current_chord.my_chord === unchanged_chord.my_chord &&
-                current_chord.legato) {
-            do_legato = true;
+                current_chord.sustain) {
+            do_sustain = true;
         }
 
         // Get current duration
@@ -366,7 +368,7 @@ function parse_chord_player() {
                     current_chord.my_chord),
             "duration": now_dur,
             "interval": now_dur,
-            "legato": do_legato
+            "sustain": do_sustain
         };
 
         // Get sum of all durations
@@ -375,7 +377,7 @@ function parse_chord_player() {
         chord_play_events.push(my_event);
 
         // Legato?
-        if (do_legato) {
+        if (do_sustain) {
             chord_play_events[unchanged_chord_event_ind].duration +=
                     get_duration_in_seconds(current_chord.get_dur());
         } else {
@@ -1097,9 +1099,12 @@ function comptoolsKeyboard(cont_class, range, options) {
     }
 
     // Get container/width/height
-    // NB! These should always be set!
+    // NB! These should always be set in pixels.
     var keyb_conw = parseFloat(d3.select(cont_class).style("width"));
     var keyb_conh = parseFloat(d3.select(cont_class).style("height"));
+    
+    // Add a little height to original container to account for note names
+    d3.select(cont_class).style("height", (keyb_conh + KEYB_TEXTLINE_HEIGHT) + "px");
 
     // Now we compute all the basic sizes of SVG elements
     var wh_key_height = keyb_conh;
@@ -1118,7 +1123,7 @@ function comptoolsKeyboard(cont_class, range, options) {
 
     this.svg_keyboard = d3.select(cont_class).append("svg")
             .attr("width", keyb_conw)
-            .attr("height", keyb_conh);
+            .attr("height", keyb_conh + KEYB_TEXTLINE_HEIGHT);
 
     // Start populating the svg
     var curr_note = the_range[0][0];
@@ -1170,6 +1175,15 @@ function comptoolsKeyboard(cont_class, range, options) {
                     .attr("width", marker_rad)
                     .attr("height", marker_rad)
                     .attr("class", current_note_class);
+            
+            // In note is C_
+            if (curr_note.indexOf("c") !== -1){
+                this.svg_keyboard.append('text')
+                        .attr('x', curr_x_pos + 2) // TODO: this should be improved
+                        .attr('y', wh_key_height + KEYB_TEXTLINE_HEIGHT)
+                        .attr('class', KEYB_TEXT_CLASS)
+                        .html('C' + curr_note_index);
+            }
 
             // Check if we have a black note to draw after the white key
             another_key = bl_buffer.pop();
@@ -1905,7 +1919,7 @@ comptoolsChordbuilder.prototype.edit_chord_in_player = function () {
 // What it does is it only highlights the desired note and chord in the selector
 comptoolsChordbuilder.prototype.set_note_chord = function (note, chord) {
 
-    // Set current note and chord. We assume they are legal!
+    // Set current note and chord. We assume they are appropriate!
     this.current_note = note;
     this.current_chord = chord;
 
@@ -1950,7 +1964,7 @@ comptoolsChordbuilder.prototype.selection_callback = function () {
 // **********************************
 
 // The object
-function comptoolsChordPlayerElement(root, chord, dur, oct, leg)
+function comptoolsChordPlayerElement(root, chord, dur, oct, sus)
 {
 
     // Check argument list
@@ -1966,9 +1980,9 @@ function comptoolsChordPlayerElement(root, chord, dur, oct, leg)
         my_oct = oct;
     }
     
-    var my_leg = false;
-    if (leg !== undefined){
-        my_leg = leg;
+    var my_sus = false;
+    if (sus !== undefined){
+        my_sus = sus;
     }
 
     // Initialization 
@@ -2027,8 +2041,8 @@ function comptoolsChordPlayerElement(root, chord, dur, oct, leg)
                 get_duration_in_seconds(this.get_dur()));
     }
 
-    // Whether to use legato with several same chords
-    this.legato = my_leg;
+    // Whether to use sustain with several same chords
+    this.sustain = my_sus;
 
     this.elem_id = 'chord-list-item-' + chord_list_counter++;
 
@@ -2044,17 +2058,17 @@ function comptoolsChordPlayerElement(root, chord, dur, oct, leg)
             .attr('id', this.elem_id)
             .html(my_chord_elem);
 
-    // Set up legato
-    d3.select("#" + this.elem_id + ' .chord-legato')
-            .classed('selected', this.legato);
+    // Set up sustain
+    d3.select("#" + this.elem_id + ' .chord-sustain')
+            .classed('selected', this.sustain);
 
     // Assign actions
 
     // Legato
-    d3.select("#" + this.elem_id + ' .chord-legato')
+    d3.select("#" + this.elem_id + ' .chord-sustain')
             .on('click', function () {
-                self.legato = !self.legato;
-                d3.select(this).classed('selected', self.legato);
+                self.sustain = !self.sustain;
+                d3.select(this).classed('selected', self.sustain);
                 if (comptools_config.chord_player !== undefined) {
                     comptools_config.chord_player.update_callback();
                 }
@@ -2396,8 +2410,8 @@ function comptoolsChordPlayer(player_class)
         // Update timeline
         self.update_timeline_selection(current_event.object, true);
 
-        // Start playing the chord, if not legato
-        if (!current_event.legato) {
+        // Start playing the chord, if not sustain
+        if (!current_event.sustain) {
             // Play the notes
             player_play_chord(current_event.chord_notes, current_event.duration);
 
@@ -2436,7 +2450,7 @@ function comptoolsChordPlayer(player_class)
 
         // For every play event, get actual event width on the timeline,
         // add the element to DOM, and assign "selected" class, if the
-        // corresponding chord is currently selected; skip all "legato"
+        // corresponding chord is currently selected; skip all "sustain"
 
         var my_id;
 
@@ -2449,8 +2463,8 @@ function comptoolsChordPlayer(player_class)
 
             var my_obj = my_events[k].object;
 
-            // Merge legato chords
-            if (!my_events[k].legato) {
+            // Merge sustain chords
+            if (!my_events[k].sustain) {
 
                 // Generate new id
                 my_id = "timeline-" + k;
@@ -2573,7 +2587,7 @@ function comptoolsChordPlayer(player_class)
             var tc = chord_list.get_obj_by_prop('elem_id', play_order_ids[k]);
             text += tc.my_root + " " + tc.my_chord + " "
                     + tc.get_dur() + " " + tc.get_oct()
-                    + (tc.legato ? " leg" : "") + "; ";
+                    + (tc.sustain ? " sus" : "") + "; ";
         }
 
         // Beautification
@@ -2626,15 +2640,15 @@ function comptoolsChordPlayer(player_class)
                 var my_dur = chord_elem[2];
                 var my_oct = parseInt(chord_elem[3]);
                 
-                // Determine whether this is a legato
-                var my_leg = false;
-                if (chord_elem.length === 5 && chord_elem[4] === 'leg'){
-                    my_leg = true;
+                // Determine whether this is a sustain
+                var my_sus = false;
+                if (chord_elem.length === 5 && chord_elem[4] === 'sus'){
+                    my_sus = true;
                 }
                 
                 // Add the chord to timeline
                 var my_chord = new comptoolsChordPlayerElement(my_root,
-                            my_chord, my_dur, my_oct, my_leg);
+                            my_chord, my_dur, my_oct, my_sus);
                 chord_list.push(my_chord);
 
                 // Because the relationship is many to one, we'll have to use

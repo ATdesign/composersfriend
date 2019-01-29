@@ -1,3 +1,14 @@
+/* Global mixins */
+@mixin noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
+                          supported by Chrome and Opera */
+}
+
 div.all-container{
     display: block;
     padding-top: 20px;
@@ -36,6 +47,7 @@ div.theory{
     margin-bottom: 25px;*/
     width: 900px;
     height: 400px;
+    @include noselect;
 }
 
 /* Chord progressions chart */
@@ -45,6 +57,8 @@ div.chord-progressions{
     svg text{
         font-family: 'Fira Sans', sans;
     }
+    
+    @include noselect;
 }
 
 div#id-major-progressions{
@@ -68,12 +82,14 @@ div.chord-builder{
     margin-bottom: 25px;*/
     width: 800px;
     height: 200px;
+    @include noselect;
 }
 
 div.chord-player{
     display: block;
     margin: auto;
     width: 720px;
+    @include noselect;
 }
 
 #scale-pentatonic{
@@ -124,6 +140,11 @@ div.chord-player{
     cursor: pointer;
 }
 
+.keyboard-textline-text{
+    font-size: 12pt;
+    font-weight: bold;
+}
+
 .keyboard-white-key-default{
     fill: #fff;
     stroke: #000;
@@ -168,12 +189,14 @@ div.fretboard-bass{
     stroke: #555;
     stroke-width: 1px;
     cursor: pointer;
+    @include noselect;
 }
 
 .fretboard-marker-default {
   fill: #eee;
   stroke: #555;
   cursor: pointer;
+  @include noselect;
   }
 
  .keyboard-marker-inactive{
@@ -344,14 +367,14 @@ div.fretboard-bass{
     }
 }
 
-.chord-legato{
+.chord-sustain{
     font-size: 0.8em;
     border: 1px solid #fff;
     cursor: pointer;
     padding: 3px;
 }
 
-.chord-legato.selected{
+.chord-sustain.selected{
     border: 1px solid #666;
 }
 
