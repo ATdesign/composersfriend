@@ -1565,7 +1565,17 @@ function comptoolsFretboard(cont_class, tuning, options) {
         
         // Restore or initialize positions
         if (this.pos_info === null){
-            
+            // Default behavior is to display all
+            d3.selectAll(this.cont_class + " rect." + FRET_POS_BLK_DEFAULT_CLASS)
+                    .classed('ok', true);
+            //this.savePositionInfo();
+            //this.restorePositionInfo(); // This call is needed to actually
+                                        // update marker classes
+                                        
+            // Just bruteforce it now. TODO: implement properly
+            d3.selectAll(this.cont_class + " g." + 
+                    FRET_DEFAULT_MARKER_CLASS)
+                    .classed('ok', true);
         } else
         {
             this.restorePositionInfo();
@@ -1767,7 +1777,7 @@ function comptoolsFretboard(cont_class, tuning, options) {
     
     // Save position
     this.savePositionInfo = function() {
-      return null;  
+       return null;
     };
     
     this.restorePositionInfo = function(){
@@ -1784,11 +1794,11 @@ comptoolsFretboard.prototype.clickHandler = function ()
 {
     var self = this;
     return function (d, i) {
-        action = !d3.select(this).classed("fretboard-marker-selected");
+        var action = !d3.select(this).classed("fretboard-marker-selected");
         d3.select(this).classed("fretboard-marker-selected", action);
 
         // Get the class of the selected element and pass it to callback
-        the_note = d3.select(this).attr("class");
+        var the_note = d3.select(this).attr("class");
         var myregexp = /note-([a-g]s?[0-9])/ig;
         var capt_note = myregexp.exec(the_note)[1]
                 .replace("s", "#").toUpperCase();
@@ -1802,18 +1812,20 @@ comptoolsFretboard.prototype.positionSelectionHandler = function (){
     
         // Which position control are we dealing with here?
         var the_position = d3.select(this).attr('data-posctrl');
-    
-        // What is the action?
-        var the_action = 'nok';  // nok = not ok, i.e. by default we're
-                                 // disallowing display of the marker
-                                 
-        if (d3.select(this).classed('nok')){
-            the_action = 'ok';
-            d3.select(this).classed('nok', false).classed('ok', true);
+
+        
+        if (d3.select(this).classed('ok')){
+            d3.select(this).classed('ok', false);
+            d3.selectAll(self.cont_class + " g." + 
+                    FRET_DEFAULT_MARKER_CLASS + ".nps-" + the_position)
+                    .classed('ok', false);
         }
         else
         {
-            d3.select(this).classed('ok', false).classed('nok', true);
+            d3.select(this).classed('ok', true);
+            d3.selectAll(self.cont_class + " g." + 
+                    FRET_DEFAULT_MARKER_CLASS + ".nps-" + the_position)
+                    .classed('ok', true);
         }
   };
 };

@@ -349,12 +349,6 @@ div.fretboard-bass {
 .keyboard-marker-highlighted.keyboard-marker-highlighted-root {
   fill: #ffa8c8; }
 
-.fretboard-marker-inactive {
-  opacity: 0; }
-
-.fretboard-marker-selected, .fretboard-marker-highlighted {
-  opacity: 1; }
-
 .chordbuild-marker, .chordbuild-add, .chordbuild-chord {
   cursor: pointer; }
 
@@ -375,6 +369,16 @@ div.fretboard-bass {
 
 .chordbuild-add text {
   font-size: 2em; }
+
+.fretboard-marker-inactive {
+  opacity: 0; }
+
+/* Reduce opacity = reduce confusion */
+.fretboard-marker-selected, .fretboard-marker-highlighted {
+  opacity: 0.25; }
+
+.fretboard-marker-selected.ok, .fretboard-marker-highlighted.ok {
+  opacity: 1; }
 
 .fretboard-marker-default text {
   fill: #555;
@@ -410,7 +414,7 @@ div.fretboard-bass {
   stroke: #ccc;
   stroke-width: 1px; }
 
-.fretboard-pos-blk-default.nok {
+.fretboard-pos-blk-default {
   fill: #ddd; }
 
 .fretboard-pos-blk-default.ok {
