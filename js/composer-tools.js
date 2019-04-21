@@ -2,12 +2,15 @@
 var FRET_FIRST_FRET = 63; // Base scale
 var FRET_X_OFFSET = 10; // X coordinate offset
 var FRET_Y_OFFSET = 10; // Y coordinate offset
-var FRET_DRAW_TO_FRET = 21; // Final fret to draw
+var FRET_POS_BLK_HEIGHT = 15; // Position selection block height
+var FRET_POS_BLK_OFFSET = 5; // Offset from the fretboard
+var FRET_DRAW_UPTO_FRET = 20; // Final fret to draw
 var FRET_DOTS = [0, 3, 5, 7, 9]; // Double dot at "0", i.e. 12, 24 frets
 var FRET_DOT_DIAMETER = 6; // Dot diameter
 var FRET_DOT_DEFAULT_CLASS = "fret-dot-default";
 var FRET_DEFAULT_CLASS = "fretboard-default";
 var FRET_SHADOW_DEFAULT_CLASS = "fretboard-shadow-default";
+var FRET_POS_BLK_DEFAULT_CLASS = "fretboard-pos-blk-default";
 var FRET_NUT_DEFAULT_CLASS = "fretboard-nut-default";
 var FRET_DEFAULT_MARKER_CLASS = "fretboard-marker-default";
 var FRET_WOUND_STRING_SEM_DST = 39; // Which strings are wound?
@@ -1289,7 +1292,8 @@ function comptoolsFretboard(cont_class, tuning, options) {
     var firstFretWidth = FRET_FIRST_FRET;
     var fretboardClass = FRET_DEFAULT_CLASS;
     var fretboardNutClass = FRET_NUT_DEFAULT_CLASS;
-    var fretCount = FRET_DRAW_TO_FRET;
+    var fretboardPosBlkClass = FRET_POS_BLK_DEFAULT_CLASS;
+    var fretCount = FRET_DRAW_UPTO_FRET + 1;
 
     if (typeof options !== 'undefined' && typeof options === 'object' && options !== null)
     {
@@ -1308,6 +1312,11 @@ function comptoolsFretboard(cont_class, tuning, options) {
         {
             fretboardNutClass = options.fretboardNutClass;
         }
+        
+        if (options.hasOwnProperty("fretboardPosBlkClass"))
+        {
+            fretboardPosBlkClass = options.fretboardPosBlkClass;
+        }
 
         if (options.hasOwnProperty("fretCount"))
         {
@@ -1322,6 +1331,13 @@ function comptoolsFretboard(cont_class, tuning, options) {
     this.cont_class = cont_class;
     this.svg_fretboard = null;
 
+    // Position information: show selected/highlighted notes only on the
+    // specified range of frets
+    this.pos_info = null;
+   
+    // This method creates the actual fretboard. TODO: method name may be
+    // misleading, so maybe rename. Also, rebuilding the SVG on tuning change
+    // will also remove position information; be sure to save/update that
     this.updateTuning = function (tuning) {
 
         // Check optional argument
@@ -1335,6 +1351,9 @@ function comptoolsFretboard(cont_class, tuning, options) {
 
         // Save notes
         this.saveHighlightedNotes();
+        
+        // Save position information
+        this.savePositionInfo();
 
         // Remove the SVG (if it exists)
         d3.select(cont_class).selectAll('*').remove()
@@ -1360,12 +1379,15 @@ function comptoolsFretboard(cont_class, tuning, options) {
         var fret_conh = parseFloat(d3.select(cont_class).style("height"));
 
         var fret_w = fret_conw - FRET_X_OFFSET;
-        var fret_h = fret_conh - FRET_Y_OFFSET;
+        var fret_h = fret_conh - FRET_Y_OFFSET - FRET_POS_BLK_HEIGHT - FRET_POS_BLK_OFFSET;
+        
+        // We draw here the position block
+        var fret_pos_blk = fret_h + FRET_Y_OFFSET + FRET_POS_BLK_OFFSET;
 
         // Create the SVG container: fills the containing container
         this.svg_fretboard = d3.select(cont_class).append("svg")
                 .attr("width", fret_w)
-                .attr("height", fret_h);
+                .attr("height", fret_h + fret_pos_blk);
 
         // Single string height
         var fret_string_h = Math.floor(fret_h / (this.fret_notes.count + 1));
@@ -1385,6 +1407,14 @@ function comptoolsFretboard(cont_class, tuning, options) {
                 .attr("width", now_fret_size)
                 .attr("height", fret_h)
                 .attr("class", fretboardNutClass);
+        
+        // Position selection block
+        this.svg_fretboard.append("rect").attr("x", fret_x_coord)
+                .attr("y", fret_pos_blk)
+                .attr("width", now_fret_size)
+                .attr("height", FRET_POS_BLK_HEIGHT)
+                .attr("class", fretboardPosBlkClass + " nok")
+                .attr("data-posctrl", 0);
 
         // Add the first center
         centerPos.push(Math.floor(fret_x_coord + now_fret_size / 2));
@@ -1403,6 +1433,13 @@ function comptoolsFretboard(cont_class, tuning, options) {
                     .attr("width", now_fret_size)
                     .attr("height", fret_h)
                     .attr("class", fretboardClass);
+            
+            this.svg_fretboard.append("rect").attr("x", fret_x_coord)
+                .attr("y", fret_pos_blk)
+                .attr("width", now_fret_size)
+                .attr("height", FRET_POS_BLK_HEIGHT)
+                .attr("class", fretboardPosBlkClass + " nok")
+                .attr("data-posctrl", n);
 
             // Decide whether to draw a circle mark here
             if (FRET_DOTS.indexOf(n % 12) !== -1)
@@ -1503,7 +1540,8 @@ function comptoolsFretboard(cont_class, tuning, options) {
 
                 fret_marker_x = centerPos[j] - half_fret_marker_size;
                 fret_marker_y = current_string_y - half_fret_marker_size;
-                var now_g = this.svg_fretboard.append("g").attr("class", current_note_class);
+                var now_g = this.svg_fretboard.append("g")
+                        .attr("class", current_note_class + " nps-" + j);
                 now_g.append("rect")
                         .attr("x", fret_marker_x)
                         .attr("y", fret_marker_y)
@@ -1517,13 +1555,26 @@ function comptoolsFretboard(cont_class, tuning, options) {
             }
 
             // Assign click events
-            d3.selectAll("g." + FRET_DEFAULT_MARKER_CLASS)
+            d3.selectAll(this.cont_class + " g." + FRET_DEFAULT_MARKER_CLASS)
                     .on('click', this.clickHandler());
 
         }
 
         // Restore notes, if needed
         this.restoreHighlightedNotes();
+        
+        // Restore or initialize positions
+        if (this.pos_info === null){
+            
+        } else
+        {
+            this.restorePositionInfo();
+        }
+        
+        // Assign click events to position selection controls
+        d3.selectAll(this.cont_class + " rect." + FRET_POS_BLK_DEFAULT_CLASS)
+                .on('click', this.positionSelectionHandler());
+        
 
     }
 
@@ -1713,6 +1764,15 @@ function comptoolsFretboard(cont_class, tuning, options) {
         // Remove the stored notes
         this.notes = null;
     };
+    
+    // Save position
+    this.savePositionInfo = function() {
+      return null;  
+    };
+    
+    this.restorePositionInfo = function(){
+      return null;  
+    };
 
     // Update the fretboard (initializtion)
     this.updateTuning();
@@ -1734,6 +1794,28 @@ comptoolsFretboard.prototype.clickHandler = function ()
                 .replace("s", "#").toUpperCase();
         self.selection_callback(capt_note, action);
     };
+};
+
+comptoolsFretboard.prototype.positionSelectionHandler = function (){
+  var self = this;
+  return function (d, i) {
+    
+        // Which position control are we dealing with here?
+        var the_position = d3.select(this).attr('data-posctrl');
+    
+        // What is the action?
+        var the_action = 'nok';  // nok = not ok, i.e. by default we're
+                                 // disallowing display of the marker
+                                 
+        if (d3.select(this).classed('nok')){
+            the_action = 'ok';
+            d3.select(this).classed('nok', false).classed('ok', true);
+        }
+        else
+        {
+            d3.select(this).classed('ok', false).classed('nok', true);
+        }
+  };
 };
 
 // Callback function to run when the note is selected

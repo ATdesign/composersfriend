@@ -382,20 +382,20 @@ div.fretboard-bass {
   font-size: 10px;
   font-family: "Fira Sans", sans; }
 
-.fretboard-marker-highlighted {
+.fretboard-marker-highlighted.ok {
   fill: #f4ffa8; }
 
-.fretboard-marker-selected rect {
+.fretboard-marker-selected.ok rect {
   stroke: #d12c00;
   stroke-width: 2px; }
 
-.fretboard-marker-highlighted.fretboard-marker-highlighted-root {
+.fretboard-marker-highlighted.fretboard-marker-highlighted-root.ok {
   fill: #ffa8c8; }
 
-.fretboard-marker-highlighted.fretboard-marker-highlighted-root text {
+.fretboard-marker-highlighted.fretboard-marker-highlighted-root.ok text {
   fill: #000; }
 
-.fretboard-marker-highlighted text {
+.fretboard-marker-highlighted.ok text {
   fill: #000;
   stroke: none;
   font-size: 10px; }
@@ -404,6 +404,17 @@ div.fretboard-bass {
   fill: #7C5B53;
   stroke: #eee;
   storke-width: 2px; }
+
+.fretboard-pos-blk-default {
+  cursor: pointer;
+  stroke: #ccc;
+  stroke-width: 1px; }
+
+.fretboard-pos-blk-default.nok {
+  fill: #ddd; }
+
+.fretboard-pos-blk-default.ok {
+  fill: #aaa; }
 
 .fretboard-nut-bass {
   fill: #ddd;
