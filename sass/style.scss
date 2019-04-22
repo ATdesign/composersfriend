@@ -267,7 +267,7 @@ div.fretboard-bass{
     fill: #f4ffa8;
 }
 
-.fretboard-marker-selected.ok rect{
+.fretboard-marker-selected rect{
      stroke: #d12c00;
      stroke-width: 2px;
 }
@@ -280,7 +280,7 @@ div.fretboard-bass{
     fill: #000;
 }
 
-.fretboard-marker-highlighted.ok text{
+.fretboard-marker-highlighted text{
     fill: #000;
     stroke: none;
     font-size: 10px;

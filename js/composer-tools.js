@@ -2,7 +2,7 @@
 var FRET_FIRST_FRET = 63; // Base scale
 var FRET_X_OFFSET = 10; // X coordinate offset
 var FRET_Y_OFFSET = 10; // Y coordinate offset
-var FRET_POS_BLK_HEIGHT = 15; // Position selection block height
+var FRET_POS_BLK_HEIGHT = 10; // Position selection block height
 var FRET_POS_BLK_OFFSET = 5; // Offset from the fretboard
 var FRET_DRAW_UPTO_FRET = 20; // Final fret to draw
 var FRET_DOTS = [0, 3, 5, 7, 9]; // Double dot at "0", i.e. 12, 24 frets
