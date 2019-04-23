@@ -10,7 +10,6 @@ var FRET_DOT_DIAMETER = 6; // Dot diameter
 var FRET_DOT_DEFAULT_CLASS = "fret-dot-default";
 var FRET_DEFAULT_CLASS = "fretboard-default";
 var FRET_SHADOW_DEFAULT_CLASS = "fretboard-shadow-default";
-var FRET_POS_BLK_DEFAULT_CLASS = "fretboard-pos-blk-default";
 var FRET_NUT_DEFAULT_CLASS = "fretboard-nut-default";
 var FRET_DEFAULT_MARKER_CLASS = "fretboard-marker-default";
 var FRET_WOUND_STRING_SEM_DST = 39; // Which strings are wound?
@@ -1105,7 +1104,7 @@ function comptoolsKeyboard(cont_class, range, options) {
     // NB! These should always be set in pixels.
     var keyb_conw = parseFloat(d3.select(cont_class).style("width"));
     var keyb_conh = parseFloat(d3.select(cont_class).style("height"));
-    
+
     // Add a little height to original container to account for note names
     d3.select(cont_class).style("height", (keyb_conh + KEYB_TEXTLINE_HEIGHT) + "px");
 
@@ -1178,9 +1177,9 @@ function comptoolsKeyboard(cont_class, range, options) {
                     .attr("width", marker_rad)
                     .attr("height", marker_rad)
                     .attr("class", current_note_class);
-            
+
             // In note is C_
-            if (curr_note.indexOf("c") !== -1){
+            if (curr_note.indexOf("c") !== -1) {
                 this.svg_keyboard.append('text')
                         .attr('x', curr_x_pos + 2) // TODO: this should be improved
                         .attr('y', wh_key_height + KEYB_TEXTLINE_HEIGHT)
@@ -1292,7 +1291,6 @@ function comptoolsFretboard(cont_class, tuning, options) {
     var firstFretWidth = FRET_FIRST_FRET;
     var fretboardClass = FRET_DEFAULT_CLASS;
     var fretboardNutClass = FRET_NUT_DEFAULT_CLASS;
-    var fretboardPosBlkClass = FRET_POS_BLK_DEFAULT_CLASS;
     var fretCount = FRET_DRAW_UPTO_FRET + 1;
 
     if (typeof options !== 'undefined' && typeof options === 'object' && options !== null)
@@ -1312,11 +1310,6 @@ function comptoolsFretboard(cont_class, tuning, options) {
         {
             fretboardNutClass = options.fretboardNutClass;
         }
-        
-        if (options.hasOwnProperty("fretboardPosBlkClass"))
-        {
-            fretboardPosBlkClass = options.fretboardPosBlkClass;
-        }
 
         if (options.hasOwnProperty("fretCount"))
         {
@@ -1326,6 +1319,7 @@ function comptoolsFretboard(cont_class, tuning, options) {
     }
 
     this.fret_notes = new Object();
+    this.range_slider = null;
     this.notes = null;
     this.tuning = tuning.toUpperCase();
     this.cont_class = cont_class;
@@ -1333,8 +1327,8 @@ function comptoolsFretboard(cont_class, tuning, options) {
 
     // Position information: show selected/highlighted notes only on the
     // specified range of frets
-    this.pos_info = null;
-   
+    this.pos_info = [];
+
     // This method creates the actual fretboard. TODO: method name may be
     // misleading, so maybe rename. Also, rebuilding the SVG on tuning change
     // will also remove position information; be sure to save/update that
@@ -1351,9 +1345,11 @@ function comptoolsFretboard(cont_class, tuning, options) {
 
         // Save notes
         this.saveHighlightedNotes();
-        
-        // Save position information
-        this.savePositionInfo();
+
+        var current_slider = null;
+        if (this.range_slider !== null){
+            current_slider = this.range_slider.value();
+        }
 
         // Remove the SVG (if it exists)
         d3.select(cont_class).selectAll('*').remove()
@@ -1380,8 +1376,8 @@ function comptoolsFretboard(cont_class, tuning, options) {
 
         var fret_w = fret_conw - FRET_X_OFFSET;
         var fret_h = fret_conh - FRET_Y_OFFSET - FRET_POS_BLK_HEIGHT - FRET_POS_BLK_OFFSET;
-        
-        // We draw here the position block
+
+        // We draw here the position slider
         var fret_pos_blk = fret_h + FRET_Y_OFFSET + FRET_POS_BLK_OFFSET;
 
         // Create the SVG container: fills the containing container
@@ -1393,6 +1389,13 @@ function comptoolsFretboard(cont_class, tuning, options) {
         var fret_string_h = Math.floor(fret_h / (this.fret_notes.count + 1));
 
         var fret_x_coord = FRET_X_OFFSET;
+        
+        // Reset the array
+        this.pos_info = [];
+
+        // Start pushing the values to position array
+        this.pos_info.push(0); // First element should be zero
+        this.pos_info.push(fret_x_coord + FRET_X_OFFSET);
 
         // We will need to find the smallest fret width to determine the
         // size of the note markers. Also, we need all center positions.
@@ -1407,14 +1410,6 @@ function comptoolsFretboard(cont_class, tuning, options) {
                 .attr("width", now_fret_size)
                 .attr("height", fret_h)
                 .attr("class", fretboardNutClass);
-        
-        // Position selection block
-        this.svg_fretboard.append("rect").attr("x", fret_x_coord)
-                .attr("y", fret_pos_blk)
-                .attr("width", now_fret_size)
-                .attr("height", FRET_POS_BLK_HEIGHT)
-                .attr("class", fretboardPosBlkClass + " nok")
-                .attr("data-posctrl", 0);
 
         // Add the first center
         centerPos.push(Math.floor(fret_x_coord + now_fret_size / 2));
@@ -1433,13 +1428,6 @@ function comptoolsFretboard(cont_class, tuning, options) {
                     .attr("width", now_fret_size)
                     .attr("height", fret_h)
                     .attr("class", fretboardClass);
-            
-            this.svg_fretboard.append("rect").attr("x", fret_x_coord)
-                .attr("y", fret_pos_blk)
-                .attr("width", now_fret_size)
-                .attr("height", FRET_POS_BLK_HEIGHT)
-                .attr("class", fretboardPosBlkClass + " nok")
-                .attr("data-posctrl", n);
 
             // Decide whether to draw a circle mark here
             if (FRET_DOTS.indexOf(n % 12) !== -1)
@@ -1469,11 +1457,42 @@ function comptoolsFretboard(cont_class, tuning, options) {
             }
 
             fret_x_coord += now_fret_size;
+            this.pos_info.push(fret_x_coord - FRET_X_OFFSET); 
 
         }
 
         // Compute the width of the whole fretboard
         fret_width = fret_x_coord - FRET_X_OFFSET;
+        
+        if (current_slider === null){
+            current_slider = [0, fret_width];
+        }
+
+        // Insert the slider
+        this.range_slider = d3
+                .sliderBottom()
+                .min(0)
+                .max(fret_width)
+                .width(fret_width)
+                .fill('#0b5a9d')
+                .ticks(0)
+                .default(current_slider)
+                .handle(
+                        d3
+                        .symbol()
+                        .type(d3.symbolTriangle)
+                        .size(200)()
+                        )
+                .on('end', val => {
+                    this.update_display_range(val);
+
+                });
+
+        var gRange = this.svg_fretboard
+                .append('g')
+                .attr('transform', 'translate(' + FRET_X_OFFSET + ',' + fret_pos_blk + ')');
+
+        gRange.call(this.range_slider);
 
         // Fret min width determines marker size...
         var fret_marker_size = fret_min_width;
@@ -1560,32 +1579,12 @@ function comptoolsFretboard(cont_class, tuning, options) {
 
         }
 
+        // Set the range
+        this.update_display_range(current_slider);
+
         // Restore notes, if needed
         this.restoreHighlightedNotes();
         
-        // Restore or initialize positions
-        if (this.pos_info === null){
-            // Default behavior is to display all
-            d3.selectAll(this.cont_class + " rect." + FRET_POS_BLK_DEFAULT_CLASS)
-                    .classed('ok', true);
-            //this.savePositionInfo();
-            //this.restorePositionInfo(); // This call is needed to actually
-                                        // update marker classes
-                                        
-            // Just bruteforce it now. TODO: implement properly
-            d3.selectAll(this.cont_class + " g." + 
-                    FRET_DEFAULT_MARKER_CLASS)
-                    .classed('ok', true);
-        } else
-        {
-            this.restorePositionInfo();
-        }
-        
-        // Assign click events to position selection controls
-        d3.selectAll(this.cont_class + " rect." + FRET_POS_BLK_DEFAULT_CLASS)
-                .on('click', this.positionSelectionHandler());
-        
-
     }
 
 
@@ -1774,14 +1773,68 @@ function comptoolsFretboard(cont_class, tuning, options) {
         // Remove the stored notes
         this.notes = null;
     };
-    
-    // Save position
-    this.savePositionInfo = function() {
-       return null;
-    };
-    
-    this.restorePositionInfo = function(){
-      return null;  
+
+    // Set the range programmatically
+    this.update_range = function(inds){
+        
+        var lInd = inds[0];
+        var rInd = inds[1];
+        
+        // Swap if incorrect
+        if (lInd > rInd){
+            lInd = inds[1];
+            rInd = inds[0];
+        }
+        
+        // Check that range is valid
+        if (lInd < 0) {lInd = 0};
+        if (rInd > this.pos_info.length-2) {rInd = this.pos_info.length-2};
+        
+        // Ranges should be centered, so...
+        var lsl = (this.pos_info[lInd] + this.pos_info[lInd+1]) / 2;
+        var rsl = (this.pos_info[rInd] + this.pos_info[rInd+1]) / 2;
+        
+        this.range_slider.value([lsl, rsl])
+        this.update_display_range([lsl, rsl]);
+        
+    }
+
+    // Update the actual range for display
+    this.update_display_range = function (val) {
+        
+        // Choose correct range
+        lVal = val[0];
+        rVal = val[1];
+        if (lVal > rVal){
+            lVal = val[1];
+            rVal = val[0];            
+        }
+        
+        // For left locator, start from the last element of the array
+        var lInd, rInd;
+        for (var k=this.pos_info.length-1; k>=0; k--){
+            lInd = k;
+            if (this.pos_info[k] < lVal){
+                break;
+            }
+        }
+        
+        for (var k=1; k<this.pos_info.length; k++){
+            rInd = k-1;
+            if (this.pos_info[k] > rVal){
+                break;
+            }
+        }
+        
+        // Now that we have the ranges, it is straightforward to udpate the
+        // information about position range
+        d3.selectAll(this.cont_class + " g.fretboard-marker-default")
+                .classed('ok', false);
+        for (var k=lInd; k<=rInd; k++){
+            d3.selectAll(this.cont_class + " g.fretboard-marker-default.nps-" + k)
+                    .classed('ok', true);
+        }
+        
     };
 
     // Update the fretboard (initializtion)
@@ -1804,30 +1857,6 @@ comptoolsFretboard.prototype.clickHandler = function ()
                 .replace("s", "#").toUpperCase();
         self.selection_callback(capt_note, action);
     };
-};
-
-comptoolsFretboard.prototype.positionSelectionHandler = function (){
-  var self = this;
-  return function (d, i) {
-    
-        // Which position control are we dealing with here?
-        var the_position = d3.select(this).attr('data-posctrl');
-
-        
-        if (d3.select(this).classed('ok')){
-            d3.select(this).classed('ok', false);
-            d3.selectAll(self.cont_class + " g." + 
-                    FRET_DEFAULT_MARKER_CLASS + ".nps-" + the_position)
-                    .classed('ok', false);
-        }
-        else
-        {
-            d3.select(this).classed('ok', true);
-            d3.selectAll(self.cont_class + " g." + 
-                    FRET_DEFAULT_MARKER_CLASS + ".nps-" + the_position)
-                    .classed('ok', true);
-        }
-  };
 };
 
 // Callback function to run when the note is selected
@@ -2073,9 +2102,9 @@ function comptoolsChordPlayerElement(root, chord, dur, oct, sus)
     {
         my_oct = oct;
     }
-    
+
     var my_sus = false;
-    if (sus !== undefined){
+    if (sus !== undefined) {
         my_sus = sus;
     }
 
@@ -2085,17 +2114,17 @@ function comptoolsChordPlayerElement(root, chord, dur, oct, sus)
     // Check root and chord, use default (C maj) if unsupported
     var my_root = 'C';
     root = flats2sharps(root).toUpperCase().replace("H", "B"); // Make sure root is correct
-    if (note_array.indexOf(root) !== -1){
+    if (note_array.indexOf(root) !== -1) {
         my_root = root;
-    }else{
+    } else {
         console.log('Wrong chord root detected. Using default value.');
     }
-    
+
     var my_chord = 'maj';
     chord = chord.toLowerCase();
-    if (chord_structures.hasOwnProperty(chord)){
+    if (chord_structures.hasOwnProperty(chord)) {
         my_chord = chord;
-    }else{
+    } else {
         console.log('Wrong chord detected. Using default value.');
     }
 
@@ -2107,14 +2136,14 @@ function comptoolsChordPlayerElement(root, chord, dur, oct, sus)
 
     // Indices for duration and octave: defaults to length of 1/2 and 3rd octave
     this.duration_index = CHORD_LENGTHS.indexOf(my_dur);
-    if (this.duration_index === -1){
+    if (this.duration_index === -1) {
         my_dur = '1/2';
         this.duration_index = CHORD_LENGTHS.indexOf('1/2');
         console.log('Wrong duration detected. Using default value.');
     }
-    
+
     this.octave_index = CHORD_OCTAVES.indexOf(my_oct);
-    if (this.octave_index === -1){
+    if (this.octave_index === -1) {
         my_oct = 3;
         this.octave_index = CHORD_OCTAVES.indexOf(3);
         console.log('Wrong octave detected. Using default value.');
@@ -2689,11 +2718,11 @@ function comptoolsChordPlayer(player_class)
         if (text.slice(-1) === ";") {
             text = text.substr(0, text.length - 1);
         }
-        
+
         // Add the comment with some additional information
         var add_com = "";
-        if (comptools_config.theory !== undefined && 
-                comptools_config.theory.root !== "null"){
+        if (comptools_config.theory !== undefined &&
+                comptools_config.theory.root !== "null") {
             add_com = "{*Scale: " + comptools_config.theory.root + " " +
                     comptools_config.theory.scale + "*} ";
         }
@@ -2706,7 +2735,7 @@ function comptoolsChordPlayer(player_class)
 
         // Clear the current chords
         this.clear();
-        
+
         // Remove the comments
         text = text.replace(/{\*.*\*}/, "");
 
@@ -2727,22 +2756,22 @@ function comptoolsChordPlayer(player_class)
 
             // Parse depending on the length
             if (chord_elem.length === 4 || chord_elem.length === 5) {
-                
+
                 // Root, chord, duration, octave
                 var my_root = chord_elem[0];
                 var my_chord = chord_elem[1];
                 var my_dur = chord_elem[2];
                 var my_oct = parseInt(chord_elem[3]);
-                
+
                 // Determine whether this is a sustain
                 var my_sus = false;
-                if (chord_elem.length === 5 && chord_elem[4] === 'sus'){
+                if (chord_elem.length === 5 && chord_elem[4] === 'sus') {
                     my_sus = true;
                 }
-                
+
                 // Add the chord to timeline
                 var my_chord = new comptoolsChordPlayerElement(my_root,
-                            my_chord, my_dur, my_oct, my_sus);
+                        my_chord, my_dur, my_oct, my_sus);
                 chord_list.push(my_chord);
 
                 // Because the relationship is many to one, we'll have to use

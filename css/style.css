@@ -409,17 +409,6 @@ div.fretboard-bass {
   stroke: #eee;
   storke-width: 2px; }
 
-.fretboard-pos-blk-default {
-  cursor: pointer;
-  stroke: #ccc;
-  stroke-width: 1px; }
-
-.fretboard-pos-blk-default {
-  fill: #ddd; }
-
-.fretboard-pos-blk-default.ok {
-  fill: #aaa; }
-
 .fretboard-nut-bass {
   fill: #ddd;
   stroke: #eee;
