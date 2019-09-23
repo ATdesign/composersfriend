@@ -399,11 +399,24 @@ function parse_chord_player() {
 
 
 // Used for converting between sharps / flats
-var pure_tones = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+var pure_tones = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 
 var note_scinot = /([A-G]#?)([0-9])/;
 var note_scifnot = /([A-G])([0-9])/;
 var note_scinot_global = /([A-G]#?)([0-9])/g;
+
+var note_tuning_parser = /([a-g](?:#|b)?)(-?[0-9])/i;
+
+// Tunings list
+var tunings_6_string = {
+"Standard": "E2A2D3G3B3E4",
+"Tune down 1/2 step": "Eb2Ab2Db3Gb3Bb3Eb4",
+"Tune down 1 step": "D2G2C3F3A3D4",
+"Tune down 2 steps": "C2F2Bb2Eb3G3C4",
+"Drop D": "D2A2D3G3B3E4",
+"Drop D tune down 1/2 step": "Db2Ab2Db3Gb3Bb3Eb4"
+};
+
 
 // For this version, we only consider classical Major/Minor scales + pentatonics
 // Therefore, to make this tool more universal, a partial rewrite will be needed
@@ -504,12 +517,24 @@ function flats2sharps(notes) {
     }
     var new_notes = new Array();
     for (var k = 0; k < notes.length; k++) {
+        
+        var the_number_regex = /(-?[0-9])/;
+        var number_match = the_number_regex.exec(notes[k]);
+        var the_octave = null;
+        if (number_match){
+            the_octave = parseInt(number_match[1]);
+        }
+        
         if (notes[k].indexOf("b") !== -1) {
             var pt_index = pure_tones.indexOf(notes[k][0]) - 1;
             if (pt_index < 0) {
                 pt_index = pure_tones.length - 1;
+                if (the_octave !== null){
+                    the_octave -= 1;
+                }
             }
-            new_notes.push(pure_tones[pt_index] + "#");
+            new_notes.push(pure_tones[pt_index] + "#" 
+                    + ((the_octave !== null) ? the_octave : ""));
         } else
         {
             new_notes.push(notes[k]);
