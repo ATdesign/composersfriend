@@ -403,9 +403,9 @@ var pure_tones = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 
 var note_scinot = /([A-G]#?)([0-9])/;
 var note_scifnot = /([A-G])([0-9])/;
-var note_scinot_global = /([A-G]#?)([0-9])/g;
 
 var note_tuning_parser = /([a-g](?:#|b)?)(-?[0-9])/i;
+var note_tuning_parser_g = /([a-g](?:#|b)?)(-?[0-9])/gi;
 
 // Tunings list
 var tunings_6_string = {
@@ -416,6 +416,8 @@ var tunings_6_string = {
 "Drop D": "D2A2D3G3B3E4",
 "Drop D tune down 1/2 step": "Db2Ab2Db3Gb3Bb3Eb4"
 };
+
+var tunings_7_string = []; // TODO
 
 
 // For this version, we only consider classical Major/Minor scales + pentatonics
@@ -496,6 +498,7 @@ function sharps2flats(notes) {
     }
     var new_notes = new Array();
     for (var k = 0; k < notes.length; k++) {
+        // TODO: Should implement octave number matching for consistency
         if (notes[k].indexOf("#") !== -1) {
             var pt_index = pure_tones.indexOf(notes[k][0]);
             new_notes.push(pure_tones[(pt_index + 1) % pure_tones.length] + "b");
@@ -1342,11 +1345,46 @@ function comptoolsFretboard(cont_class, tuning, options) {
         }
 
     }
+    
+    // This method processes the tuning string and return the resulting array
+    this.processTuningString = function(){
+        
+        tuning = this.tuning;
+        
+        // Initialize placeholder
+        this.fret_notes.note = Array();
+        this.fret_notes.index = Array();
+        this.fret_notes.full_note = Array();
+        this.fret_notes.count = null;
+        
+        var match = note_tuning_parser_g.exec(tuning);
+        while (match !== null) {
+            
+            // Need to ensure proper format for the parser
+            var match1 = note_tuning_parser.exec(flats2sharps(match[0]));
+            
+            // Use the converted match
+            this.fret_notes.full_note.push(match1[0]);
+            this.fret_notes.note.push(match1[1]);
+            this.fret_notes.index.push(match1[2]);
+            this.fret_notes.count++;
+            
+            match = note_tuning_parser_g.exec(tuning);
+        }
+        
+        // Internally, we start drawing from the first string. So we need
+        // to reverse the order of the notes.
+        this.fret_notes.full_note.reverse();
+        this.fret_notes.note.reverse();
+        this.fret_notes.index.reverse();
+        
+    };
 
     this.fret_notes = new Object();
     this.range_slider = null;
     this.notes = null;
-    this.tuning = tuning.toUpperCase();
+    this.tuning = tuning;
+    this.processTuningString();
     this.cont_class = cont_class;
     this.svg_fretboard = null;
 
@@ -1362,11 +1400,10 @@ function comptoolsFretboard(cont_class, tuning, options) {
         // Check optional argument
         if (typeof tuning !== 'undefined' && tuning !== null && tuning !== "")
         {
-            this.tuning = tuning.toUpperCase(); // Update tuning property
+            this.tuning = tuning; // Update tuning property
         }
 
         var cont_class = this.cont_class;
-        var fret_current_tuning = this.tuning;
 
         // Save notes
         this.saveHighlightedNotes();
@@ -1377,22 +1414,10 @@ function comptoolsFretboard(cont_class, tuning, options) {
         }
 
         // Remove the SVG (if it exists)
-        d3.select(cont_class).selectAll('*').remove()
-
-        // Create note/index arrays
-        this.fret_notes.note = Array();
-        this.fret_notes.index = Array();
-        this.fret_notes.full_note = Array();
-        this.fret_notes.count = null;
-
-        match = note_scinot_global.exec(fret_current_tuning);
-        while (match !== null) {
-            this.fret_notes.full_note.push(match[0]);
-            this.fret_notes.note.push(match[1]);
-            this.fret_notes.index.push(match[2]);
-            this.fret_notes.count++;
-            match = note_scinot_global.exec(fret_current_tuning);
-        }
+        d3.select(cont_class).selectAll('*').remove();
+        
+        // Process tuning string
+        this.processTuningString();
 
         // Get the container height and width
         // NB! These should always be set!

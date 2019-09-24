@@ -23,10 +23,10 @@
 
         <!-- D3.js  -->
         <script src="js/d3.min.js"></script>
-        
+
         <!-- Simple slider for D3 -->
         <script src="js/d3-simple-slider.min.js"></script>
-        
+
         <!-- Mousetrap for key bindings -->
         <script src="js/mousetrap.min.js"></script>
 
@@ -80,7 +80,9 @@
                     <h3 class="uk-accordion-title">Guitar</h3>
                     <div class="uk-accordion-content">
                         <div class="fretboard fb-guitar"></div>
-                        <span class="guitar-update-tuning"><span class="change">Change tuning</span>, <span class="standard">set to standard</span>, <span class="dropd">set to Drop D</span></span>
+                        <div class="uk-margin">
+                            <select class="uk-select option-guitar-tuning"></select>
+                        </div>
                     </div>
                 </li>
                 <li>
@@ -100,7 +102,7 @@
                                     <div class="uk-margin uk-grid-small uk-child-width-auto uk-grid">
                                         <label><input class="uk-checkbox option-use-sound" type="checkbox" checked> Play sound</label>
                                     </div>
-                                    
+
                                     <div class="uk-margin uk-grid-small uk-child-width-auto uk-grid">
                                         <label><input class="uk-checkbox option-use-midi" type="checkbox"> Use MIDI output</label>
                                     </div>
@@ -120,19 +122,20 @@
 
         <!-- Add Tone.js -->
         <script src="js/Tone.min.js"></script>
-        
+
         <!-- Chrome audio context policy fix -->
         <script type="text/javascript">
             if (Tone.context.state !== 'running') {
-            Tone.context.resume();
+                Tone.context.resume();
             }
-            
+
             document.documentElement.addEventListener(
-            "mousedown", function(){
-              mouse_IsDown = true;
-              if (Tone.context.state !== 'running') {
-              Tone.context.resume();
-            }});
+                    "mousedown", function () {
+                        mouse_IsDown = true;
+                        if (Tone.context.state !== 'running') {
+                            Tone.context.resume();
+                        }
+                    });
         </script>
 
         <script type="text/javascript">
@@ -145,14 +148,14 @@
         <!-- Create a couple of fretboards ... -->
         <script type="text/javascript">
             my_theory = new comptoolsTheory("theory-container");
-            
+
             my_progbuild = new comptoolsChordProgressions('.chord-progressions');
 
             my_chbuild = new comptoolsChordbuilder(".chord-builder");
 
             st_keyboard = new comptoolsKeyboard(".keyboard", "C1-C5");
 
-            fb_guitar = new comptoolsFretboard(".fb-guitar", "E4B3G3D3A2E2");
+            fb_guitar = new comptoolsFretboard(".fb-guitar", "E2A2D3G3B3E4");
 
             my_chplayer = new comptoolsChordPlayer('.chord-player');
 
@@ -161,7 +164,7 @@
                 "fretboardClass": "fretboard-bass",
                 "fretboardNutClass": "fretboard-nut-bass",
                 "fretCount": 17};
-            fb_bass = new comptoolsFretboard(".fb-bass", "G2D2A1E1", bass_options);
+            fb_bass = new comptoolsFretboard(".fb-bass", "E1A1D2G2", bass_options);
 
             // Connect all the instruments together
             the_glue = new InstrumentGlue();
@@ -175,7 +178,7 @@
 
             the_glue.theory = my_theory;
             my_theory.selection_callback = the_glue.funHighlightNotes;
-            
+
             // This is also bound to theory since chord
             // progressions appear for the given scale
             the_glue.chord_progressions = my_progbuild;
@@ -196,49 +199,57 @@
             $('#chord-list').on('change', function () {
                 my_chplayer.update_callback();
             });
-            
+
             // Options
             my_options = new comptoolsOptions();
-            
+
             // Experimental MIDI player feature
             comptools_midi_player = new comptoolsMIDIPlayer();
             comptools_midi_player.initialize();
+
+            // Populate tuning options for guitar
+            for (var i in tunings_6_string) {
+                $('.option-guitar-tuning').append($('<option>', {
+                    value: tunings_6_string[i],
+                    text: '6 String: ' + i
+                }));
+            }
             
-            // Additional options for tuning
-            $('.guitar-update-tuning .change').on('click', function(){
-               var tuning = prompt("New tuning", fb_guitar.tuning);
-               if (tuning !== null){
-                   fb_guitar.updateTuning(tuning);
-               }
+            // Add the "Custom" option
+            $('.option-guitar-tuning').append($('<option>', {
+                    value: "custom",
+                    text: "> Custom tuning"
+                }));
+                
+             $('.option-guitar-tuning').on('change', function(e){
+                 if (this.value.toLowerCase() === "custom"){
+                     var tuning = prompt("New tuning", fb_guitar.tuning);
+                    if (tuning !== null) {
+                    fb_guitar.updateTuning(tuning);
+                    }
+                 }else
+                 {
+                     fb_guitar.updateTuning(this.value);
+                 }
+             });
+
+            $('.bass-update-tuning').on('click', function () {
+                var tuning = prompt("New tuning", fb_bass.tuning);
+                if (tuning !== null) {
+                    fb_bass.updateTuning(tuning);
+                }
             });
-            
-            // Predefined: standard
-            $('.guitar-update-tuning .standard').on('click', function(){
-                fb_guitar.updateTuning("E4B3G3D3A2E2");
+
+            $('.import-chord-list').on('click', function () {
+                var chtext = prompt("Paste chord list text here", "");
+                if (chtext !== null) {
+                    my_chplayer.import_chords(chtext);
+                }
             });
-            
-            // Predefined: drop d
-            $('.guitar-update-tuning .dropd').on('click', function(){
-                fb_guitar.updateTuning("E4B3G3D3A2D2");
-            });
-            
-            $('.bass-update-tuning').on('click', function(){
-               var tuning = prompt("New tuning", fb_bass.tuning);
-               if (tuning !== null){
-                   fb_bass.updateTuning(tuning);
-               }
-            });
-            
-            $('.import-chord-list').on('click', function(){
-               var chtext = prompt("Paste chord list text here", "");
-               if (chtext !== null){
-                   my_chplayer.import_chords(chtext);
-               }
-            });
-            
-            $('.export-chord-list').on('click', function(){
-               var mytext = my_chplayer.export_chords();
-               prompt("Copy and save this text", mytext);
+
+            $('.export-chord-list').on('click', function () {
+                var mytext = my_chplayer.export_chords();
+                prompt("Copy and save this text", mytext);
             });
 
         </script>
