@@ -81,7 +81,9 @@
                     <div class="uk-accordion-content">
                         <div class="fretboard fb-guitar"></div>
                         <div class="uk-margin">
-                            <select class="uk-select option-guitar-tuning"></select>
+                            <form style="text-align: center">
+                                <select class="uk-select option-guitar-tuning" style="width: 710px;"></select>
+                            </form>
                         </div>
                     </div>
                 </li>
@@ -208,10 +210,24 @@
             comptools_midi_player.initialize();
 
             // Populate tuning options for guitar
-            for (var i in tunings_6_string) {
+            for (var i in guit_tunings_6_string) {
                 $('.option-guitar-tuning').append($('<option>', {
-                    value: tunings_6_string[i],
+                    value: guit_tunings_6_string[i],
                     text: '6 String: ' + i
+                }));
+            }
+            
+            for (var i in guit_tunings_7_string) {
+                $('.option-guitar-tuning').append($('<option>', {
+                    value: guit_tunings_7_string[i],
+                    text: '7 String: ' + i
+                }));
+            }
+            
+            for (var i in guit_tunings_8_string) {
+                $('.option-guitar-tuning').append($('<option>', {
+                    value: guit_tunings_8_string[i],
+                    text: '8 String: ' + i
                 }));
             }
             

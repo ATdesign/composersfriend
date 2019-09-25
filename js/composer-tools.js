@@ -408,7 +408,7 @@ var note_tuning_parser = /([a-g](?:#|b)?)(-?[0-9])/i;
 var note_tuning_parser_g = /([a-g](?:#|b)?)(-?[0-9])/gi;
 
 // Tunings list
-var tunings_6_string = {
+var guit_tunings_6_string = {
 "Standard": "E2A2D3G3B3E4",
 "Tune down 1/2 step": "Eb2Ab2Db3Gb3Bb3Eb4",
 "Tune down 1 step": "D2G2C3F3A3D4",
@@ -417,7 +417,21 @@ var tunings_6_string = {
 "Drop D tune down 1/2 step": "Db2Ab2Db3Gb3Bb3Eb4"
 };
 
-var tunings_7_string = []; // TODO
+var guit_tunings_7_string = {
+"Standard": "B1E2A2D3G3B3E4",
+"Drop A": "A1E2A2D3G3B3E4",
+"Drop D": "A1D2A2D3G3B3E4",
+"Tune down 1/2 step": "Bb1Eb2Ab2Db3Gb3Bb3Eb4",
+"Tune down 1 step": "A1D2G2C3F3A3D4",
+"Tune down 2 steps": "G1C2F2Bb2Eb3G3C4"
+};
+
+var guit_tunings_8_string = {
+"Standard": "F#1B1E2A2D3G3B3E4",
+"Tune down 1/2 step": "F1Bb1Eb2Ab2Db3Gb3Bb3Eb4",
+"Tune down 1 step": "E1A1D2G2C3F3A3D4",
+"Tune down 2 steps": "D1G1C2F2Bb2Eb3G3C4"
+};
 
 
 // For this version, we only consider classical Major/Minor scales + pentatonics
@@ -1383,7 +1397,7 @@ function comptoolsFretboard(cont_class, tuning, options) {
     this.fret_notes = new Object();
     this.range_slider = null;
     this.notes = null;
-    this.tuning = tuning;
+    this.tuning = tuning.replace(/\s/g,'');
     this.processTuningString();
     this.cont_class = cont_class;
     this.svg_fretboard = null;
@@ -1400,7 +1414,7 @@ function comptoolsFretboard(cont_class, tuning, options) {
         // Check optional argument
         if (typeof tuning !== 'undefined' && tuning !== null && tuning !== "")
         {
-            this.tuning = tuning; // Update tuning property
+            this.tuning = tuning.replace(/\s/g,''); // Update tuning property
         }
 
         var cont_class = this.cont_class;
