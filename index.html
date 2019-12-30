@@ -91,10 +91,14 @@
                     <h3 class="uk-accordion-title">Bass</h3>
                     <div class="uk-accordion-content">
                         <div class="fretboard-bass fb-bass"></div>
-                        <span class="bass-update-tuning">Change tuning</span>
+                        <div class="uk-margin">
+                            <form style="text-align: center">
+                                <select class="uk-select option-bass-tuning" style="width: 710px;"></select>
+                            </form>
+                        </div>
                     </div>
                 </li>
-                <li>
+                <li class="uk-open">
                     <h3 class="uk-accordion-title">Options</h3>
                     <div class="uk-accordion-content">
                         <div class="comptools-options">
@@ -116,6 +120,12 @@
                                 </fieldset>
                             </form>
                         </div>
+                    </div>
+                </li>
+                <li class="uk-open">
+                    <h3 class="uk-accordion-title">About</h3>
+                    <div class="uk-accordion-content">
+
                     </div>
                 </li>
             </ul>
@@ -249,10 +259,29 @@
                  }
              });
 
-            $('.bass-update-tuning').on('click', function () {
-                var tuning = prompt("New tuning", fb_bass.tuning);
-                if (tuning !== null) {
-                    fb_bass.updateTuning(tuning);
+             // Bass tunings
+            for (var i in bass_tunings) {
+                $('.option-bass-tuning').append($('<option>', {
+                    value: bass_tunings[i],
+                    text: i
+                }));
+            }
+
+            // Add the "Custom" option
+            $('.option-bass-tuning').append($('<option>', {
+                value: "custom",
+                text: "> Custom tuning"
+            }));
+
+            $('.option-bass-tuning').on('change', function(e){
+                if (this.value.toLowerCase() === "custom"){
+                    var tuning = prompt("New tuning", fb_bass.tuning);
+                    if (tuning !== null) {
+                        fb_bass.updateTuning(tuning);
+                    }
+                }else
+                {
+                    fb_bass.updateTuning(this.value);
                 }
             });
 

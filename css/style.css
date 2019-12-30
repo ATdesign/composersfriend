@@ -45,7 +45,7 @@ div.theory {
   /* Internet Explorer/Edge */
   user-select: none;
   /* Non-prefixed version, currently
-     supported by Chrome and Opera */ }
+                           supported by Chrome and Opera */ }
 
 /* Chord progressions chart */
 div.chord-progressions {
@@ -62,7 +62,7 @@ div.chord-progressions {
   /* Internet Explorer/Edge */
   user-select: none;
   /* Non-prefixed version, currently
-     supported by Chrome and Opera */ }
+                           supported by Chrome and Opera */ }
   div.chord-progressions svg text {
     font-family: 'Fira Sans', sans; }
 
@@ -97,7 +97,7 @@ div.chord-builder {
   /* Internet Explorer/Edge */
   user-select: none;
   /* Non-prefixed version, currently
-     supported by Chrome and Opera */ }
+                           supported by Chrome and Opera */ }
 
 div.chord-player {
   display: block;
@@ -115,7 +115,7 @@ div.chord-player {
   /* Internet Explorer/Edge */
   user-select: none;
   /* Non-prefixed version, currently
-     supported by Chrome and Opera */ }
+                           supported by Chrome and Opera */ }
 
 #scale-pentatonic {
   cursor: pointer; }
@@ -280,7 +280,7 @@ div.fretboard-bass {
   margin: auto;
   /*margin-top: 10px;*/
   width: 720px;
-  height: 140px;
+  height: 160px;
   background: #eee; }
 
 .fretboard-default {
@@ -316,7 +316,7 @@ div.fretboard-bass {
   /* Internet Explorer/Edge */
   user-select: none;
   /* Non-prefixed version, currently
-     supported by Chrome and Opera */ }
+                           supported by Chrome and Opera */ }
 
 .fretboard-marker-default {
   fill: #eee;
@@ -334,7 +334,7 @@ div.fretboard-bass {
   /* Internet Explorer/Edge */
   user-select: none;
   /* Non-prefixed version, currently
-     supported by Chrome and Opera */ }
+                           supported by Chrome and Opera */ }
 
 .keyboard-marker-inactive {
   opacity: 0; }
@@ -422,7 +422,7 @@ div.fretboard-bass {
   stroke: #ffe; }
 
 .fret-wound-string {
-  stroke-dasharray: 1,1; }
+  stroke-dasharray: 1, 1; }
 
 /* Chord list */
 .chord-list-element span.chord-text,

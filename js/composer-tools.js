@@ -197,7 +197,7 @@ function play_chord(note, chord, oct, len) {
     }
 
 }
-;
+
 
 // Audio context sound player
 function player_play_chord(notes, len) {
@@ -213,7 +213,7 @@ function player_play_chord(notes, len) {
         comptools_midi_player.CyclicSendOnMessage(notes);
     }
 }
-;
+
 
 // Extend array with a method to search for objects by key-value pairs
 Array.prototype.find_obj_by_prop = function (key, val) {
@@ -232,7 +232,7 @@ Array.prototype.find_obj_by_prop = function (key, val) {
 
 Array.prototype.get_obj_by_prop = function (key, val) {
     return this[this.find_obj_by_prop(key, val)];
-}
+};
 
 // Remove object from array by property
 Array.prototype.remove_obj_by_prop = function (key, val)
@@ -248,7 +248,7 @@ function get_chord(note, chord)
     var my_n = note_array.indexOf(note.toUpperCase());
     var my_c = chord_structures[chord.toLowerCase()];
 
-    var my_notes = new Array();
+    var my_notes = [];
     my_notes.push(note);
     for (var k = 0; k < my_c.length; k++) {
         my_notes.push(note_array[(my_n + my_c[k]) % note_array.length]);
@@ -272,9 +272,8 @@ function get_chord_notes(note, chord, oct)
     }
 
     // Generate an couple of octaves worth of notes to work with
-    var my_n = note_array.indexOf(note.toUpperCase());
-    var fi_n = my_n;
-    var now_notes = new Array();
+    var fi_n = note_array.indexOf(note.toUpperCase());
+    var now_notes = [];
 
     for (var j = 0; j < 24; j++)
     {
@@ -286,7 +285,7 @@ function get_chord_notes(note, chord, oct)
 
     var my_c = chord_structures[chord.toLowerCase()];
 
-    var my_notes = new Array();
+    var my_notes = [];
     my_notes.push(now_notes[0]);
     for (var k = 0; k < my_c.length; k++) {
         my_notes.push(now_notes[my_c[k]]);
@@ -431,6 +430,12 @@ var guit_tunings_8_string = {
 "Tune down 1/2 step": "F1Bb1Eb2Ab2Db3Gb3Bb3Eb4",
 "Tune down 1 step": "E1A1D2G2C3F3A3D4",
 "Tune down 2 steps": "D1G1C2F2Bb2Eb3G3C4"
+};
+
+var bass_tunings = {
+    "4 String: Standard": "E1A1D2G2",
+    "5 String: Standard (low B)": "B0E1A1D2G2",
+    "5 String: Standard (high C)": "E1A1D2G2C3"
 };
 
 
