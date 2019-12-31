@@ -14,13 +14,6 @@
         <!-- The document -->
         <link href="css/style.css" rel="stylesheet">
 
-        <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-        <!--[if lt IE 9]>
-          <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-          <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-        <![endif]-->
-
         <!-- D3.js  -->
         <script src="js/d3.min.js"></script>
 
@@ -125,7 +118,10 @@
                 <li class="uk-open">
                     <h3 class="uk-accordion-title">About</h3>
                     <div class="uk-accordion-content">
-
+                    <p><strong>Composer's Friend</strong> is a a JavaScript library for helping you practice playing guitar and piano and composing chord progressions.
+                        The library can be tailored to other fretboard and keyboard note visualization applications and has advanced features, such as MIDI
+                        connectivity. This is an example application created by using all of the library's functions.</p>
+                        <p>&copy; 2017-2019 Aleksei Tepljakov. Some documentation can be found in the <a href="https://atdesign.ee/about-music/composing-tool/">blog post</a>. More documentation will follow.</p>
                     </div>
                 </li>
             </ul>
@@ -215,10 +211,6 @@
             // Options
             my_options = new comptoolsOptions();
 
-            // Experimental MIDI player feature
-            comptools_midi_player = new comptoolsMIDIPlayer();
-            comptools_midi_player.initialize();
-
             // Populate tuning options for guitar
             for (var i in guit_tunings_6_string) {
                 $('.option-guitar-tuning').append($('<option>', {
@@ -296,6 +288,12 @@
                 var mytext = my_chplayer.export_chords();
                 prompt("Copy and save this text", mytext);
             });
+
+            // Experimental MIDI player feature
+            // TODO: Major problem when using with Korg BLE MIDI driver, must speak to Korg about this
+            comptools_midi_player = new comptoolsMIDIPlayer();
+            comptools_midi_player.initialize();
+
 
         </script>
 

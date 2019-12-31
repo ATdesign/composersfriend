@@ -2898,22 +2898,20 @@ comptoolsMIDIPlayer = function () {
     this.MIDI_outputs = [];
     this.MIDI_current_output = null;
     this.midi = null;
+    this.midi_supported = false;
     this.ready = false;
 
     // Check if support is present in the browser
     this.support = function () {
-        if (navigator.requestMIDIAccess === undefined) {
-            return false;
-        } else {
-            return true;
-        }
+        this.midi_supported = (navigator.requestMIDIAccess !== undefined);
     };
 
     this.initialize = function () {
 
         // Check if there is support, if not - return
-        if (!this.support()) {
-            return null;
+        this.support();
+        if (!this.midi_supported){
+            return this.midi_supported;
         }
 
         // Otherwise proceed with initialization
@@ -2936,8 +2934,7 @@ comptoolsMIDIPlayer = function () {
                 self.ready = true;
 
                 // Populate the controls (if present)
-                self
-                        .populateOptionsForm('option-use-midi',
+                self.populateOptionsForm('option-use-midi',
                                 'option-midi-output');
 
             } else
@@ -2993,7 +2990,7 @@ comptoolsMIDIPlayer = function () {
     this.flushNoteBuffer = function () {
         this.sendOffMessage(this.note_buffer); // Stop playing notes
         this.note_buffer = []; // Remove all notes from buffer
-    }
+    };
 
     this.sendOffMessage = function (notes, velocity) {
 
@@ -3015,7 +3012,7 @@ comptoolsMIDIPlayer = function () {
         var output = this.midi.outputs.get(this.MIDI_current_output);
         output.send(noteOffArray);
 
-    }
+    };
 
     // Special function that first sends buffered off messages
     this.CyclicSendOnMessage = function (notes, velocity) {
